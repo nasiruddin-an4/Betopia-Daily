@@ -38,14 +38,14 @@ export default function ShopPage() {
 
           <div className="hidden md:flex relative group w-72 lg:w-96">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search size={18} className="text-gray-400 group-focus-within:text-red-500 transition-colors" />
+              <Search size={18} className="text-gray-400 group-focus-within:text-amber-500 transition-colors" />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products..."
-              className="w-full bg-white text-gray-900 border border-gray-200 rounded-xl py-2.5 pl-11 pr-4 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all placeholder-gray-400 font-medium outline-none shadow-sm"
+              className="w-full bg-white text-gray-900 border border-gray-200 rounded-xl py-2.5 pl-11 pr-4 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all placeholder-gray-400 font-medium outline-none shadow-sm"
             />
           </div>
         </div>
@@ -56,7 +56,7 @@ export default function ShopPage() {
         <div className="lg:col-span-3 space-y-8">
           <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm sticky top-28">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-600">
+              <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
                 <Filter size={20} />
               </div>
               <h3 className="font-bold text-gray-900 text-xl tracking-tight">Categories</h3>
@@ -66,8 +66,8 @@ export default function ShopPage() {
               <button
                 onClick={() => setActiveCategory('All')}
                 className={`w-full text-left px-5 py-3.5 rounded-xl font-bold transition-all ${activeCategory === 'All'
-                  ? 'bg-red-600 text-white shadow-xl shadow-red-600/20'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-red-600'
+                  ? 'bg-black text-white shadow-xl shadow-black/20'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-amber-600'
                   }`}
               >
                 All Products
@@ -77,8 +77,8 @@ export default function ShopPage() {
                   key={category.id}
                   onClick={() => setActiveCategory(category.name)}
                   className={`w-full text-left px-5 py-3.5 rounded-xl font-bold transition-all flex items-center justify-between ${activeCategory === category.name
-                    ? 'bg-red-600 text-white shadow-xl shadow-red-600/20'
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-red-600'
+                    ? 'bg-black text-white shadow-xl shadow-black/20'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-amber-600'
                     }`}
                 >
                   {category.name}
@@ -100,13 +100,13 @@ export default function ShopPage() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Available Items</h2>
               <p className="text-gray-500 font-medium text-sm">
-                Showing <span className="text-red-600 font-bold">{filteredProducts.length}</span> items in {activeCategory}
+                Showing <span className="text-amber-600 font-bold">{filteredProducts.length}</span> items in {activeCategory}
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="bg-gray-100 p-1 rounded-xl flex">
-                <button className="p-2 bg-white rounded-lg shadow-sm text-red-600"><LayoutGrid size={18} /></button>
+                <button className="p-2 bg-white rounded-lg shadow-sm text-amber-600"><LayoutGrid size={18} /></button>
                 <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors"><Grid2X2 size={18} /></button>
               </div>
               <button className="flex items-center gap-2 text-sm font-bold text-gray-700 bg-white border border-gray-200 px-5 py-2.5 rounded-xl hover:shadow-md transition-all">
@@ -123,14 +123,14 @@ export default function ShopPage() {
             </div>
           ) : (
             <div className="bg-white rounded-[3rem] border border-gray-100 p-20 text-center shadow-sm">
-              <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-200">
+              <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-200">
                 <Search size={40} />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">No products found</h3>
               <p className="text-gray-500 font-medium max-w-xs mx-auto">We couldn't find any products matching your current search or category.</p>
               <button
                 onClick={() => { setSearchQuery(''); setActiveCategory('All'); }}
-                className="mt-8 font-bold text-white bg-red-600 hover:bg-red-700 px-8 py-3 rounded-2xl shadow-xl shadow-red-600/20 transition-all active:scale-95"
+                className="mt-8 font-bold text-white bg-black hover:bg-gray-900 px-8 py-3 rounded-2xl shadow-xl shadow-black/20 transition-all active:scale-95"
               >
                 Reset Selection
               </button>

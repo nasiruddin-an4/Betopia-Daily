@@ -3,10 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '../../store/useCartStore';
+import { useUserStore } from '../../store/useUserStore';
+import { useRouter } from 'next/navigation';
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, ShieldCheck } from 'lucide-react';
 
 export default function CartPage() {
+  const router = useRouter();
   const { items, updateQuantity, removeItem, getCartTotal } = useCartStore();
+  const { isAuthenticated } = useUserStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -120,11 +124,18 @@ export default function CartPage() {
               <span className="text-3xl font-bold text-gray-900">৳ {subtotal.toLocaleString()}</span>
             </div>
             
-            <Link href="/checkout" className="w-full">
-              <button className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg shadow-blue-600/30 transform hover:-translate-y-1 active:scale-95 group text-lg">
-                Proceed to Checkout <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </Link>
+            <button 
+              onClick={() => {
+                if (isAuthenticated) {
+                  router.push('/checkout');
+                } else {
+                  router.push('/login?redirect=/checkout');
+                }
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg shadow-blue-600/30 transform hover:-translate-y-1 active:scale-95 group text-lg"
+            >
+              Proceed to Checkout <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
         </div>
       </div>

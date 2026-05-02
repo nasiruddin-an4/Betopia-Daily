@@ -15,21 +15,27 @@ export default function AuthGuard({ children }) {
   }, []);
 
   useEffect(() => {
-    if (mounted && !isAuthenticated && pathname !== '/login') {
-      router.push('/login');
+    const publicRoutes = ['/', '/login', '/shop', '/cart'];
+    const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/product/');
+
+    if (mounted && !isAuthenticated && !isPublicRoute) {
+      router.push(`/login?redirect=${pathname}`);
     } else if (mounted && isAuthenticated && pathname === '/login') {
       router.push('/');
     }
   }, [isAuthenticated, pathname, router, mounted]);
 
   if (!mounted) {
-    return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    return <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
     </div>;
   }
 
-  // Allow rendering login page if not authenticated, or any page if authenticated
-  if (!isAuthenticated && pathname !== '/login') {
+  // Allow rendering public pages if not authenticated, or any page if authenticated
+  const publicRoutes = ['/', '/login', '/shop', '/cart'];
+  const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/product/');
+
+  if (!isAuthenticated && !isPublicRoute) {
     return null; // Will redirect
   }
 

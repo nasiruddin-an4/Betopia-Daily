@@ -91,19 +91,21 @@ export default function DailyDeals() {
             className="min-w-[calc(100%/2)] sm:min-w-[calc((100%-16px)/3)] lg:min-w-[calc((100%-64px)/5)] bg-white border border-gray-100 rounded-2xl p-4 flex flex-col snap-start hover:shadow-lg transition-all duration-300"
           >
             {/* Product Image */}
-            <div className="aspect-square mb-4 flex items-center justify-center overflow-hidden">
+            <Link href={`/product/${product.product_id}`} className="aspect-square mb-4 flex items-center justify-center overflow-hidden block">
                <img 
                 src={product.image_url} 
                 className="w-full h-full object-contain transition-transform duration-500 hover:scale-105" 
                 alt={product.name} 
                />
-            </div>
+            </Link>
 
             {/* Info */}
             <div className="flex-1 space-y-2">
-              <h3 className="text-xs font-bold text-gray-600 line-clamp-2 min-h-[32px] leading-snug">
-                {product.name}
-              </h3>
+              <Link href={`/product/${product.product_id}`}>
+                <h3 className="text-xs font-bold text-gray-600 line-clamp-2 min-h-[32px] leading-snug hover:text-red-600 transition-colors">
+                  {product.name}
+                </h3>
+              </Link>
               
               <div className="flex items-center gap-1.5 flex-wrap">
                  <span className="text-sm font-bold text-gray-900 italic">৳{product.unit_price}</span>
@@ -123,7 +125,7 @@ export default function DailyDeals() {
             {/* Action */}
             <button 
               onClick={() => addItem(product, 1)}
-              className="mt-4 w-full py-2 border border-red-100 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-600 hover:text-white hover:border-red-600 transition-all uppercase tracking-widest active:scale-95"
+              className="mt-4 w-full py-2 border border-black text-black text-[10px] font-bold rounded-lg hover:bg-black hover:text-white transition-all uppercase tracking-widest active:scale-95"
             >
               Add to Cart
             </button>
