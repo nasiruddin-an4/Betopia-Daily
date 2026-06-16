@@ -6,26 +6,24 @@ import { Globe, Send, Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-100 mt-20">
+    <footer className="bg-slate-900">
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
-          
+
           {/* Brand Section */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="relative inline-block">
-               <div className="bg-red-700 text-white font-bold text-2xl px-4 py-1.5 rounded flex items-center gap-1 italic tracking-tighter shadow-sm">
-                 Betopia Daily
-               </div>
-            </div>
-            
+            <Link href="/">
+              <img src="/mainLogo.png" alt="Betopia Daily" className="h-16 w-auto" />
+            </Link>
+
             <div className="space-y-2">
               <h4 className="text-gray-900 font-bold text-lg italic">Internal Employee Store</h4>
               <p className="text-gray-400 text-sm font-medium leading-relaxed max-w-xs">
                 Premium groceries and daily essentials exclusive to Betopia Group employees.
               </p>
             </div>
-            
+
             <div className="flex items-center gap-5 text-gray-400 pt-2">
               <a href="#" className="hover:text-blue-600 transition-all transform hover:scale-110"><Globe size={20} strokeWidth={2.5} /></a>
               <a href="#" className="hover:text-blue-400 transition-all transform hover:scale-110"><Send size={20} strokeWidth={2.5} /></a>
@@ -69,15 +67,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom Sub-Footer */}
-      <div className="border-t border-gray-100 bg-white py-6">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <Link href="#" className="text-sm font-bold text-gray-600 hover:text-red-600">Sitemap</Link>
-          <p className="text-sm font-bold text-gray-600">
-            All Rights Reserved © {new Date().getFullYear()} Betopia Group
-          </p>
-        </div>
-      </div>
+
     </footer>
   );
 }

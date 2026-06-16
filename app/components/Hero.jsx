@@ -1,143 +1,165 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-
-const SLIDES = [
-  { id: 1, image: "/CategoryImg/10010.jpg" },
-  { id: 2, image: "/CategoryImg/10011.jpg" },
-  { id: 3, image: "/CategoryImg/c8.jpg" },
-];
+import { ChevronLeft, ChevronRight, ArrowRight, Zap, ExternalLink } from 'lucide-react';
+import { api } from '../../lib/api';
 
 export default function Hero() {
-  // Infinite Loop Implementation: [Last, First, Second, Third, First]
-  const extendedSlides = [SLIDES[SLIDES.length - 1], ...SLIDES, SLIDES[0]];
-  const [current, setCurrent] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
-  const timerRef = useRef(null);
+  const [heroImages, setHeroImages] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const handleTransitionEnd = () => {
-    if (current === 0) {
-      setIsTransitioning(false);
-      setCurrent(SLIDES.length);
-    } else if (current === SLIDES.length + 1) {
-      setIsTransitioning(false);
-      setCurrent(1);
+  // Fetch hero images from API
+  useEffect(() => {
+    async function fetchHero() {
+      try {
+        const res = await api.getHeroImages();
+        let images = [];
+
+        if (res?.success && res.data) {
+          // Handle array of hero objects with an `images` field
+          if (Array.isArray(res.data)) {
+            // Flatten: each item may have an `images` array or be an image itself
+            res.data.forEach((item) => {
+              if (item.images && Array.isArray(item.images)) {
+                images.push(...item.images);
+              } else if (item.image) {
+                images.push(item);
+              } else if (typeof item === 'string') {
+                images.push({ image: item });
+              }
+            });
+          } else if (res.data.images && Array.isArray(res.data.images)) {
+            images = res.data.images;
+          }
+        } else if (Array.isArray(res)) {
+          res.forEach((item) => {
+            if (item.images && Array.isArray(item.images)) {
+              images.push(...item.images);
+            } else if (item.image) {
+              images.push(item);
+            }
+          });
+        }
+
+        setHeroImages(images);
+      } catch (err) {
+        console.error('Failed to fetch hero images:', err);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    fetchHero();
+  }, []);
+
+  // Auto-advance slides every 4 seconds
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % Math.max(heroImages.length, 1));
+  }, [heroImages.length]);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + Math.max(heroImages.length, 1)) % Math.max(heroImages.length, 1));
+  }, [heroImages.length]);
 
   useEffect(() => {
-    if (!isTransitioning) {
-      // Small timeout to allow the browser to process the state change before re-enabling transition
-      const timeout = setTimeout(() => setIsTransitioning(true), 20);
-      return () => clearTimeout(timeout);
-    }
-  }, [isTransitioning]);
+    if (heroImages.length <= 1) return;
+    const timer = setInterval(nextSlide, 4000);
+    return () => clearInterval(timer);
+  }, [heroImages.length, nextSlide]);
 
-  const next = useCallback(() => {
-    if (!isTransitioning) return;
-    setCurrent((prev) => prev + 1);
-  }, [isTransitioning]);
+  // ── Fallback Banner (shown when no API images or loading) ──
+  if (loading || heroImages.length === 0) {
+    return (
+      <section className="relative overflow-hidden -mt-10 -mx-[calc(50vw-50%)] bg-gray-100">
+        <div className="w-full" style={{ height: 'clamp(300px, 55vw, 700px)' }}>
+          <img
+            src="/Banner-design-for-website.jpg"
+            alt="Betopia Daily Banner"
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </section>
+    );
+  }
 
-  const prev = () => {
-    if (!isTransitioning) return;
-    setCurrent((prev) => prev - 1);
-  };
 
-  // Autoplay
-  useEffect(() => {
-    if (isPaused) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
-    timerRef.current = setInterval(next, 5000);
-    return () => clearInterval(timerRef.current);
-  }, [next, isPaused]);
+  // ── Image Slider Hero (when API images are available) ──
+  const currentImage = heroImages[currentSlide];
+  const imageUrl = currentImage?.image || currentImage?.url || currentImage;
 
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-12">
-      {/* Left Carousel Column (2/3) */}
-      <div
-        className="lg:col-span-8 relative rounded-3xl overflow-hidden group h-[300px] md:h-[450px] shadow-sm border border-gray-100 bg-white"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
-        <div
-          className="flex h-full"
-          onTransitionEnd={handleTransitionEnd}
-          style={{
-            transform: `translateX(-${current * 100}%)`,
-            transition: isTransitioning ? 'transform 1000ms cubic-bezier(0.4, 0, 0.2, 1)' : 'none'
-          }}
-        >
-          {extendedSlides.map((slide, index) => (
-            <div key={`${slide.id}-${index}`} className="min-w-full h-full relative">
-              <img src={slide.image} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-105" alt="" />
+    <section className="relative overflow-hidden -mt-10 -mx-[calc(50vw-50%)] bg-gray-900">
+      <div className="relative w-full" style={{ height: 'clamp(300px, 55vw, 550px)' }}>
+        {heroImages.map((slide, index) => {
+          const src = slide?.image || slide?.url || slide;
+          return (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+            >
+              <img
+                src={src}
+                alt={slide?.title || `Hero Banner ${index + 1}`}
+                className="w-full h-full object-cover"
+                onError={(e) => { e.target.src = 'https://placehold.co/1400x520/0d736a/white?text=Betopia'; }}
+              />
+              {/* Optional gradient overlay for readability */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent pointer-events-none" />
 
-              {/* Visible Shop Button at Bottom-Left */}
-              <div className="absolute inset-0 p-6 md:p-10 flex items-end justify-start z-20">
-                <Link
-                  href="/shop"
-                  className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-md transition-all shadow-2xl shadow-red-600/40 active:scale-95 flex items-center gap-3 transform hover:scale-105 uppercase tracking-widest border border-white/20 backdrop-blur-sm text-[13px]"
-                >
-                  SHOP NOW
-                  <ShoppingBag size={18} />
-                </Link>
-              </div>
+              {/* Slide caption if available */}
+              {(slide?.title || slide?.subtitle || slide?.link) && (
+                <div className="absolute bottom-8 left-8 md:left-16 z-20 max-w-lg">
+                  {slide?.title && (
+                    <h2 className="text-white text-2xl md:text-4xl font-bold drop-shadow-lg mb-2">{slide.title}</h2>
+                  )}
+                  {slide?.subtitle && (
+                    <p className="text-white/90 text-sm md:text-base font-medium drop-shadow mb-4">{slide.subtitle}</p>
+                  )}
+                  {slide?.link && (
+                    <Link href={slide.link} className="inline-flex items-center gap-2 bg-[#FCD34D] hover:bg-[#FBBF24] text-gray-900 font-bold px-5 py-2.5 rounded-lg transition-colors text-sm">
+                      Shop Now <ArrowRight size={16} />
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
-          ))}
-        </div>
+          );
+        })}
 
-        {/* Navigation Arrows */}
-        <button
-          onClick={prev}
-          className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-900 shadow-xl hover:bg-white transition-all opacity-0 group-hover:opacity-100 z-30 transform hover:scale-110"
-        >
-          <ChevronLeft size={24} strokeWidth={2.5} />
-        </button>
-        <button
-          onClick={next}
-          className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-900 shadow-xl hover:bg-white transition-all opacity-0 group-hover:opacity-100 z-30 transform hover:scale-110"
-        >
-          <ChevronRight size={24} strokeWidth={2.5} />
-        </button>
-
-        {/* Pagination Dots */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-30">
-          {SLIDES.map((_, i) => (
+        {/* Prev / Next Arrows */}
+        {heroImages.length > 1 && (
+          <>
             <button
-              key={i}
-              onClick={() => setCurrent(i + 1)}
-              className={`h-2.5 rounded-full transition-all duration-500 ${(current === 0 ? SLIDES.length : current === SLIDES.length + 1 ? 1 : current) === i + 1
-                ? 'w-10 bg-red-600 shadow-lg shadow-red-600/50'
-                : 'w-2.5 bg-white/50 hover:bg-white'
-                }`}
-            />
-          ))}
-        </div>
-      </div>
+              onClick={prevSlide}
+              className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white flex items-center justify-center transition-all shadow-lg border border-white/20"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white flex items-center justify-center transition-all shadow-lg border border-white/20"
+              aria-label="Next slide"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </>
+        )}
 
-      {/* Right Static Column (1/3) */}
-      <div className="lg:col-span-4 grid grid-cols-1 gap-4">
-        <div className="relative rounded-3xl overflow-hidden group shadow-sm">
-          <img src="/CategoryImg/DiscoverImg1.webp" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110 duration-1000" alt="" />
-          <div className="relative p-6 h-full flex items-end justify-start z-10">
-            <Link href="/shop" className="bg-white text-red-600 font-bold px-6 py-2 rounded-md text-xs hover:bg-red-50 transition-all uppercase tracking-widest shadow-2xl shadow-black/20 transform hover:scale-110">
-              SHOP NOW
-            </Link>
+        {/* Dot indicators */}
+        {heroImages.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+            {heroImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`rounded-full transition-all duration-300 ${index === currentSlide ? 'w-6 h-2 bg-white' : 'w-2 h-2 bg-white/50 hover:bg-white/80'}`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
-        </div>
-
-        <div className="relative rounded-3xl overflow-hidden group shadow-sm">
-          <img src="/CategoryImg/DiscoverImg3.webp" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110 duration-1000" alt="" />
-          <div className="relative p-6 h-full flex items-end justify-start z-10">
-            <Link href="/shop" className="bg-yellow-400 text-gray-900 font-bold px-8 py-2 rounded-md text-xs hover:bg-yellow-300 transition-all uppercase tracking-widest shadow-2xl shadow-black/20 transform hover:scale-110">
-              SHOP NOW
-            </Link>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

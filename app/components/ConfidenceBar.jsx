@@ -33,11 +33,11 @@ const FEATURES = [
 
 export default function ConfidenceBar() {
   return (
-    <section className="py-12 border-y border-gray-100">
+    <section className="py-12 border-t border-gray-100">
       <div className="mb-10 text-center">
         <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Shop With Confidence</h2>
       </div>
-      
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
         {FEATURES.map((f, i) => (
           <div key={i} className="flex flex-col items-center text-center space-y-3 group">

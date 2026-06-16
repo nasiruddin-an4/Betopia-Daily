@@ -3,6 +3,8 @@ import Hero from "./components/Hero";
 import CategoryBento from "./components/CategoryBento";
 import DailyDeals from "./components/DailyDeals";
 import FeaturedOffers from "./components/FeaturedOffers";
+import HotDealsCarousel from "./components/HotDealsCarousel";
+import AllProducts from "./components/AllProducts";
 import ConfidenceBar from "./components/ConfidenceBar";
 import RecommendationCarousel from "./components/RecommendationCarousel";
 import MoreToDiscover from "./components/MoreToDiscover";
@@ -17,23 +19,17 @@ export default function Home() {
       {/* Shop by Category Bento Grid */}
       <CategoryBento />
 
-      {/* Daily Deals Carousel */}
-      <DailyDeals />
+      {/* Hot Deals Carousel */}
+      <HotDealsCarousel />
 
-      {/* Featured Offers Section */}
-      <FeaturedOffers />
+      {/* All Products Grid */}
+      <AllProducts />
+
 
       {/* Shop With Confidence Feature Bar */}
       <ConfidenceBar />
 
-      {/* You Might Also Like Carousel */}
-      <RecommendationCarousel />
 
-      {/* NEW: More to Discover Grid */}
-      <MoreToDiscover />
-
-      {/* NEW: About Section */}
-      <AboutSection />
     </div>
   );
 }

@@ -13,10 +13,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+@theme inline {
+  --color-brand-bright-orange: #f79549;
+  --color-brand-coral: #ff7f50;
+  --color-brand-red: #ee2d46;
+  --color-brand-dark-gray: #414042;
+}
+
 /* Hide scrollbar for clean carousels */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
