@@ -17,7 +17,7 @@ const BENTO_SIZES = [
 ];
 
 export default function CategoryBento() {
-  const [activeTab, setActiveTab] = useState('categories'); // 'categories' | 'brands'
+  const [activeTab, setActiveTab] = useState('brands'); // 'categories' | 'brands'
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -61,16 +61,6 @@ export default function CategoryBento() {
         <div className="flex items-center gap-4">
           <div className="flex bg-gray-100 p-1 rounded-xl">
             <button
-              onClick={() => setActiveTab('categories')}
-              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-                activeTab === 'categories' 
-                  ? 'bg-white text-red-600 shadow-sm' 
-                  : 'text-gray-500 hover:text-gray-900'
-              }`}
-            >
-              Categories
-            </button>
-            <button
               onClick={() => setActiveTab('brands')}
               className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
                 activeTab === 'brands' 
@@ -79,6 +69,16 @@ export default function CategoryBento() {
               }`}
             >
               Brands
+            </button>
+            <button
+              onClick={() => setActiveTab('categories')}
+              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+                activeTab === 'categories' 
+                  ? 'bg-white text-red-600 shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              Categories
             </button>
           </div>
           <Link href="/shop" className="text-sm font-bold text-gray-500 hover:text-red-600 transition-colors hidden md:block">

@@ -7,6 +7,8 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import { Clock, Zap, Users } from 'lucide-react';
 import { differenceInDays } from 'date-fns';
 import { api } from '@/lib/api';
+import { useCartStore } from '../../store/useCartStore';
+import { useSidebarStore } from '../../store/useSidebarStore';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -15,6 +17,8 @@ import 'swiper/css/pagination';
 export default function HotDealsCarousel() {
   const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const addItem = useCartStore((state) => state.addItem);
+  const openCart = useSidebarStore((state) => state.openCart);
 
   useEffect(() => {
     async function fetchDeals() {
@@ -65,6 +69,7 @@ export default function HotDealsCarousel() {
         <Swiper
           modules={[Autoplay]}
           spaceBetween={16}
+          autoplay={{ delay: 3000, disableOnInteraction: false }}
           breakpoints={{
             640: { slidesPerView: 2.2 },
             768: { slidesPerView: 3.2 },
@@ -82,12 +87,26 @@ export default function HotDealsCarousel() {
               daysLeft = differenceInDays(new Date(deal.hot_deal_end), new Date());
             }
 
+            const handleAddToCart = (e) => {
+              e.preventDefault();
+              const productToAdd = {
+                ...deal,
+                product_id: deal.id,
+                unit_price: deal.discounted_price ? parseFloat(deal.discounted_price) : parseFloat(deal.price) || 0,
+                image_url: deal.first_image,
+                name: deal.name,
+                unit: deal.unit,
+              };
+              addItem(productToAdd, 1);
+              openCart();
+            };
+
             return (
               <SwiperSlide key={deal.id} className="h-auto">
                 <div className="bg-white border border-gray-200 rounded-xl overflow-hidden transition-shadow relative flex flex-col h-[450px] group/card">
                   <Link href={`/product/${deal.slug}`} className="flex flex-col flex-1">
                     {/* Image Container */}
-                    <div className="relative aspect-[4/3] p-4 bg-white flex items-center justify-center">
+                    <div className="relative h-68 w-full p-4 bg-white flex items-center justify-center">
                       <img
                         src={deal.first_image || '/placeholder.png'}
                         alt={deal.name}
@@ -113,7 +132,7 @@ export default function HotDealsCarousel() {
                   </Link>
 
                   <div className="px-4 pb-4 mt-auto">
-                    <button className="w-full bg-brand-bright-orange hover:bg-brand-coral text-white text-xs font-bold py-2.5 rounded-md flex items-center justify-center gap-1.5 transition-colors">
+                    <button onClick={handleAddToCart} className="w-full bg-brand-bright-orange hover:bg-brand-coral text-white text-xs font-bold py-2.5 rounded-md flex items-center justify-center gap-1.5 transition-colors">
                       <Zap size={14} className="fill-white" /> Add to Bag
                     </button>
                   </div>

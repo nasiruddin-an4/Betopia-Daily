@@ -77,14 +77,14 @@ export default function ProductCard({ product }) {
       unit_price: currentPrice,
       selected_unit: selectedUnit,
     };
+    // The store automatically checks auth, extracts the slug, and opens the cart
     addItem(modifiedProduct, 1);
-    openCart();
   };
 
   return (
     <div className="flex flex-col bg-white overflow-hidden transition-all duration-300 relative group border border-gray-100 p-3 rounded-2xl hover:bg-white hover:border-amber-100 hover:shadow-xl hover:shadow-amber-500/5">
       {/* Image Container */}
-      <Link href={`/product/${product.product_id}`} className="relative aspect-[4/3] overflow-hidden bg-white mb-4 rounded-xl block">
+      <Link href={`/product/${product.product_id}`} className="relative h-48 w-full flex items-center justify-center overflow-hidden bg-white mb-4 rounded-xl block">
         <img
           src={product.image_url}
           alt={product.name}

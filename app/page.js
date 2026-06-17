@@ -16,6 +16,8 @@ export default function Home() {
       {/* Hero Section */}
       <Hero />
 
+      {/* <FeaturedOffers /> */}
+
       {/* Shop by Category Bento Grid */}
       <CategoryBento />
 

@@ -4,12 +4,16 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { ShoppingCart, ChevronDown } from 'lucide-react';
+import { useCartStore } from '../../store/useCartStore';
+import { useSidebarStore } from '../../store/useSidebarStore';
 
 export default function AllProducts() {
   const [products, setProducts] = useState([]);
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const addItem = useCartStore((state) => state.addItem);
+  const openCart = useSidebarStore((state) => state.openCart);
 
   // Filters
   const [selectedBrand, setSelectedBrand] = useState('');
@@ -72,8 +76,8 @@ export default function AllProducts() {
     <section className="py-12 border-t border-gray-100">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">Selected Deals for You</h2>
-          <p className="text-gray-500 mt-2">Deals ending soon - Don't miss out!</p>
+          <h2 className="text-3xl font-bold text-gray-900">Explore All Products</h2>
+          <p className="text-gray-500 mt-1">Discover our wide range of quality items for your daily needs.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 relative z-50">
@@ -89,13 +93,13 @@ export default function AllProducts() {
           <div className="relative z-50">
             <button
               onClick={() => setOpenDropdown(openDropdown === 'brand' ? null : 'brand')}
-              className="bg-white border border-gray-200 text-sm font-medium rounded-lg px-4 py-2.5 text-gray-700 outline-none hover:border-gray-300 focus:ring-2 focus:ring-[#0D9488] flex items-center justify-between min-w-[140px] shadow-sm transition-all"
+              className="bg-white border border-gray-200 text-sm font-medium rounded-lg px-4 py-2.5 text-gray-700 outline-none hover:border-gray-300 focus:ring-2 focus:ring-[#0D9488] flex items-center justify-between min-w-[140px] transition-all"
             >
               <span className="truncate">{selectedBrand ? brands.find(b => b.slug === selectedBrand)?.name || 'All Brands' : 'All Brands'}</span>
               <ChevronDown size={16} className={`ml-2 text-gray-500 transition-transform ${openDropdown === 'brand' ? 'rotate-180' : ''}`} />
             </button>
             {openDropdown === 'brand' && (
-              <div className="absolute top-full mt-2 w-full min-w-[180px] right-0 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50 max-h-60 overflow-y-auto">
+              <div className="absolute top-full mt-2 w-full min-w-[180px] right-0 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50">
                 <div
                   className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${!selectedBrand ? 'bg-teal-50 text-teal-700 font-bold' : 'text-gray-700 font-medium'}`}
                   onClick={() => { setSelectedBrand(''); setOpenDropdown(null); }}
@@ -119,13 +123,13 @@ export default function AllProducts() {
           <div className="relative z-50">
             <button
               onClick={() => setOpenDropdown(openDropdown === 'category' ? null : 'category')}
-              className="bg-white border border-gray-200 text-sm font-medium rounded-lg px-4 py-2.5 text-gray-700 outline-none hover:border-gray-300 focus:ring-2 focus:ring-[#0D9488] flex items-center justify-between min-w-[150px] shadow-sm transition-all"
+              className="bg-white border border-gray-200 text-sm font-medium rounded-lg px-4 py-2.5 text-gray-700 outline-none hover:border-gray-300 focus:ring-2 focus:ring-[#0D9488] flex items-center justify-between min-w-[150px] transition-all"
             >
               <span className="truncate">{selectedCategory ? categories.find(c => c.slug === selectedCategory)?.name || 'All Categories' : 'All Categories'}</span>
               <ChevronDown size={16} className={`ml-2 text-gray-500 transition-transform ${openDropdown === 'category' ? 'rotate-180' : ''}`} />
             </button>
             {openDropdown === 'category' && (
-              <div className="absolute top-full mt-2 w-full min-w-[200px] right-0 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50 max-h-60 overflow-y-auto">
+              <div className="absolute top-full mt-2 w-full min-w-[200px] right-0 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50">
                 <div
                   className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${!selectedCategory ? 'bg-teal-50 text-teal-700 font-bold' : 'text-gray-700 font-medium'}`}
                   onClick={() => { setSelectedCategory(''); setOpenDropdown(null); }}
@@ -149,7 +153,7 @@ export default function AllProducts() {
           <div className="relative z-50">
             <button
               onClick={() => setOpenDropdown(openDropdown === 'sort' ? null : 'sort')}
-              className="bg-white border border-gray-200 text-sm font-medium rounded-lg px-4 py-2.5 text-gray-700 outline-none hover:border-gray-300 focus:ring-2 focus:ring-[#0D9488] flex items-center justify-between min-w-[140px] shadow-sm transition-all"
+              className="bg-white border border-gray-200 text-sm font-medium rounded-lg px-4 py-2.5 text-gray-700 outline-none hover:border-gray-300 focus:ring-2 focus:ring-[#0D9488] flex items-center justify-between min-w-[140px] transition-all"
             >
               <span className="truncate">
                 {sortBy === 'price_low' ? 'Price: Low to High' :
@@ -160,7 +164,7 @@ export default function AllProducts() {
               <ChevronDown size={16} className={`ml-2 text-gray-500 transition-transform ${openDropdown === 'sort' ? 'rotate-180' : ''}`} />
             </button>
             {openDropdown === 'sort' && (
-              <div className="absolute top-full mt-2 w-full min-w-[180px] right-0 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50 max-h-60 overflow-y-auto">
+              <div className="absolute top-full mt-2 w-full min-w-[180px] right-0 bg-white border border-gray-200 rounded-xl shadow-lg py-1.5 z-50">
                 <div
                   className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${!sortBy ? 'bg-teal-50 text-teal-700 font-bold' : 'text-gray-700 font-medium'}`}
                   onClick={() => { setSortBy(''); setOpenDropdown(null); }}
@@ -214,20 +218,30 @@ export default function AllProducts() {
             const discount = parseFloat(product.discount_amount) || 0;
             const discountPct = price > 0 ? Math.round((discount / price) * 100) : 0;
 
+            const handleAddToCart = (e) => {
+              e.preventDefault();
+              const productToAdd = {
+                ...product,
+                product_id: product.id || product.slug,
+                unit_price: product.discounted_price ? parseFloat(product.discounted_price) : parseFloat(product.price) || 0,
+                image_url: product.first_image || (product.images && product.images.length > 0 ? product.images[0].image : '/placeholder.png'),
+                name: product.name,
+                unit: product.unit,
+              };
+              addItem(productToAdd, 1);
+              openCart();
+            };
+
             return (
-              <div key={product.id || product.slug || Math.random()} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow relative flex flex-col h-full group">
-                <Link href={`/product/${product.slug || product.id}`} className="relative aspect-[4/3] p-4 flex items-center justify-center block">
+              <div key={product.id || product.slug || Math.random()} className="bg-white border border-gray-200 rounded-xl overflow-hidden transition-shadow relative flex flex-col h-full group">
+                <Link href={`/product/${product.slug || product.id}`} className="relative h-60 w-full p-4 flex items-center justify-center block">
                   <img
                     src={product.first_image || (product.images && product.images.length > 0 ? product.images[0].image : '/placeholder.png')}
                     alt={product.name}
                     className="object-contain w-full h-full transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => { e.target.src = 'https://placehold.co/400x300?text=No+Image'; }}
                   />
-                  {discount > 0 && (
-                    <div className="absolute top-3 left-3 bg-red-500 text-white text-[11px] font-bold px-2 py-1.5 rounded-r-xl rounded-tl-xl shadow-sm z-10">
-                      {discount} TK OFF
-                    </div>
-                  )}
+
                 </Link>
 
                 <div className="p-4 flex-1 flex flex-col border-t border-gray-50">
@@ -266,7 +280,7 @@ export default function AllProducts() {
                   </div>
 
                   <div className="mt-auto">
-                    <button className="w-full bg-brand-bright-orange hover:bg-brand-coral text-white text-xs font-bold py-2.5 rounded-md flex items-center justify-center gap-1.5 transition-colors">
+                    <button onClick={handleAddToCart} className="w-full bg-brand-bright-orange hover:bg-brand-coral text-white text-xs font-bold py-2.5 rounded-md flex items-center justify-center gap-1.5 transition-colors">
                       <ShoppingCart size={14} /> Add to Bag
                     </button>
                   </div>

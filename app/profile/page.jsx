@@ -81,7 +81,7 @@ export default function ProfilePage() {
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-3 text-sm font-medium text-gray-500">
                    <div className="flex items-center gap-1.5">
                       <Mail size={16} />
-                      {user.erp_employee_id.toLowerCase()}@betopia.com
+                      {user.email || 'user@betopiagroup.com'}
                    </div>
                    <div className="flex items-center gap-1.5">
                       <Phone size={16} />

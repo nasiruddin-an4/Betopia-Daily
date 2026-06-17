@@ -29,20 +29,27 @@ import {
   Headphones,
   Phone,
   Flame,
-  Zap
+  Zap,
+  ClipboardList,
+  Info,
+  Shield,
+  MapPin,
+  RotateCcw,
 } from "lucide-react";
 import CartSidebar from "../../components/CartSidebar";
+import LoginModal from "./LoginModal";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { items } = useCartStore();
-  const { user, isAuthenticated, logout } = useUserStore();
-  const { isCartOpen, openCart, closeCart } = useSidebarStore();
+  const { user, isAuthenticated, logout, isAdmin } = useUserStore();
+  const { isCartOpen, openCart, closeCart, isLoginModalOpen, openLoginModal, closeLoginModal } = useSidebarStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const dropdownRef = useRef(null);
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
+  const userIsAdmin = isAdmin();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -58,6 +65,12 @@ export default function Navbar() {
   // Don't show full navbar on login page if not logged in
   if (!user && pathname === "/login") return null;
 
+  const profileMenuItems = [
+    { icon: <Package size={18} />, label: "Order History", href: "/orders" },
+    { icon: <User size={18} />, label: "Personal Info", href: "/profile" },
+    { icon: <Heart size={18} />, label: "Wishlist", href: "/wishlist" },
+  ];
+
   return (
     <>
       <nav className="bg-white sticky top-0 z-50 shadow-sm">
@@ -67,7 +80,7 @@ export default function Navbar() {
             {/* Logo & Main Nav */}
             <div className="flex items-center shrink-0 gap-8">
               <Link href="/" className="flex items-center h-10 w-auto">
-                <img src="/mainLogo.png" alt="Betopia Daily" className="h-42 w-auto" />
+                <img src="/mainLogo.svg" alt="Betopia Daily" className="h-7 w-auto" />
               </Link>
               <Link href="/shop" className="hidden md:flex items-center gap-2 text-gray-800 font-bold hover:text-brand-bright-orange transition-colors">
                 <LayoutGrid size={16} />
@@ -116,76 +129,70 @@ export default function Navbar() {
 
                   <div className="h-6 w-px bg-gray-200 mx-1 hidden sm:block"></div>
 
-                  {/* Profile Dropdown Trigger */}
+                  {/* User Profile Button - Icon + First Name with Dropdown */}
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
-                      className="flex items-center gap-2 p-1 pl-2 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all"
+                      className="flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all"
                     >
-                      <div className="w-8 h-8 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center text-[#0D9488] font-bold text-sm">
-                        {user.name?.[0] || 'U'}
+                      <div className="w-8 h-8 rounded-full bg-brand-bright-orange/10 border border-brand-bright-orange/20 flex items-center justify-center text-brand-bright-orange font-bold text-sm">
+                        {user.first_name?.[0] || user.name?.[0] || 'U'}
                       </div>
+                      <span className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-gray-700">
+                        {user.first_name || user.name?.split(' ')[0] || 'User'}
+                      </span>
                       <ChevronDown
                         size={14}
                         className={`text-gray-400 transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""}`}
                       />
                     </button>
 
-                    {/* Dropdown Menu */}
+                    {/* Profile Dropdown */}
                     {isProfileOpen && (
-                      <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-[60]">
-                        <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-                          <p className="font-bold text-gray-900 truncate">
-                            {user.name}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {user.erp_employee_id}
-                          </p>
-                        </div>
-
-                        {/* Balance Section */}
-                        <div className="p-3">
-                          <div className="flex items-center gap-3 bg-teal-50/50 rounded-lg p-3 border border-teal-100/50">
-                            <div className="w-8 h-8 rounded-md bg-white flex items-center justify-center shadow-sm">
-                              <Wallet size={16} className="text-[#0D9488]" />
+                      <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-[60]">
+                        {/* User Info Header */}
+                        <div className="p-4 border-b border-gray-100 bg-gray-50/80">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-brand-bright-orange/10 border border-brand-bright-orange/20 flex items-center justify-center text-brand-bright-orange font-bold text-base">
+                              {user.first_name?.[0] || user.name?.[0] || 'U'}
                             </div>
-                            <div>
-                              <p className="text-[10px] font-bold text-gray-500 uppercase">
-                                Balance
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-gray-900 text-sm truncate">
+                                {user.name || user.first_name || 'User'}
                               </p>
-                              <p className="text-sm font-bold text-gray-900">
-                                ৳ {user.salary_credit_balance?.toLocaleString() || 0}
+                              <p className="text-[11px] text-gray-500 truncate">
+                                ID: {user.employee_id || user.erp_employee_id || '—'}
                               </p>
                             </div>
                           </div>
                         </div>
 
-                        <div className="p-2">
-                          <Link
-                            href="/profile"
-                            onClick={() => setIsProfileOpen(false)}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
-                          >
-                            <UserCircle size={18} />
-                            My Profile
-                          </Link>
-                          <Link
-                            href="/profile"
-                            onClick={() => setIsProfileOpen(false)}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
-                          >
-                            <Package size={18} />
-                            My Orders
-                          </Link>
+                        {/* Menu Items */}
+                        <div className="py-1.5">
+                          {profileMenuItems.map((item) => (
+                            <Link
+                              key={item.label}
+                              href={item.href}
+                              onClick={() => setIsProfileOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              <span className="text-red-500">{item.icon}</span>
+                              {item.label}
+                            </Link>
+                          ))}
                         </div>
 
-                        <div className="p-2 border-t border-gray-50">
+                        {/* Logout */}
+                        <div className="border-t border-gray-100 py-1.5">
                           <button
-                            onClick={logout}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            onClick={() => {
+                              logout();
+                              setIsProfileOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
                           >
                             <LogOut size={18} />
-                            Sign Out
+                            Logout
                           </button>
                         </div>
                       </div>
@@ -193,10 +200,26 @@ export default function Navbar() {
                   </div>
                 </div>
               ) : (
-                <div className="hidden sm:flex items-center">
-                  <Link href="/login" className="bg-brand-bright-orange hover:bg-brand-coral text-white font-medium py-2 px-6 rounded-lg text-sm transition-colors">
-                    Login
-                  </Link>
+                <div className="flex items-center gap-4">
+                  {/* Cart Toggle Button for Unauthenticated */}
+                  <button
+                    onClick={openCart}
+                    id="cart-trigger-unauth"
+                    className="p-2 text-gray-700 hover:text-[#0D9488] transition-all relative flex items-center"
+                  >
+                    <ShoppingCart size={22} />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
+                        {cartCount}
+                      </span>
+                    )}
+                  </button>
+
+                  <div className="hidden sm:flex items-center">
+                    <button onClick={openLoginModal} className="bg-brand-bright-orange hover:bg-brand-coral text-white font-medium py-2 px-6 rounded-lg text-sm transition-colors">
+                      Login
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -221,20 +244,35 @@ export default function Navbar() {
               <button onClick={() => { setIsMenuOpen(false); openCart(); }} className="font-medium text-gray-700 py-2 hover:text-[#0D9488] text-left">View Cart</button>
               {user && (
                 <>
-                  <Link href="/profile" className="font-medium text-gray-700 py-2 hover:text-[#0D9488]">My Orders</Link>
+                  {profileMenuItems.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="font-medium text-gray-700 py-2 hover:text-[#0D9488] flex items-center gap-2"
+                    >
+                      <span className="text-red-500">{item.icon}</span>
+                      {item.label}
+                    </Link>
+                  ))}
                   <div className="py-2 border-t border-gray-100 flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-500 uppercase">Balance</span>
-                    <span className="font-bold text-gray-900">৳ {user.salary_credit_balance?.toLocaleString() || 0}</span>
+                    <span className="text-sm font-medium text-gray-500 uppercase">Employee ID</span>
+                    <span className="font-bold text-gray-900">{user.employee_id || user.erp_employee_id || '—'}</span>
                   </div>
-                  <button onClick={logout} className="font-medium text-red-600 py-2 text-left">Sign Out</button>
+                  <button onClick={logout} className="font-medium text-red-600 py-2 text-left flex items-center gap-2">
+                    <LogOut size={16} /> Sign Out
+                  </button>
                 </>
+              )}
+              {!user && (
+                <button onClick={() => { setIsMenuOpen(false); openLoginModal(); }} className="font-medium text-gray-700 py-2 hover:text-[#0D9488] text-left">Login</button>
               )}
             </div>
           </div>
         )}
       </nav>
       <CartSidebar isOpen={isCartOpen} onClose={closeCart} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
     </>
   );
 }
-

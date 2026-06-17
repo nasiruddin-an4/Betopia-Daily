@@ -2,72 +2,109 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Globe, Send, Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-900">
-      {/* Main Footer Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+    <footer className="bg-slate-900 pt-16 pb-12 relative overflow-hidden">
 
-          {/* Brand Section */}
-          <div className="lg:col-span-4 space-y-6">
-            <Link href="/">
-              <img src="/mainLogo.png" alt="Betopia Daily" className="h-16 w-auto" />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+
+          {/* Column 1: Brand & Contact Info */}
+          <div className="lg:col-span-1 flex flex-col space-y-4">
+            <Link href="/" className="inline-block mb-4">
+              <img src="/mainLogo.svg" alt="Betopia Daily" className="h-7 w-auto object-contain filter invert brightness-0" style={{ filter: 'brightness(0) invert(1)' }} />
             </Link>
 
-            <div className="space-y-2">
-              <h4 className="text-gray-900 font-bold text-lg italic">Internal Employee Store</h4>
-              <p className="text-gray-400 text-sm font-medium leading-relaxed max-w-xs">
-                Premium groceries and daily essentials exclusive to Betopia Group employees.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-5 text-gray-400 pt-2">
-              <a href="#" className="hover:text-blue-600 transition-all transform hover:scale-110"><Globe size={20} strokeWidth={2.5} /></a>
-              <a href="#" className="hover:text-blue-400 transition-all transform hover:scale-110"><Send size={20} strokeWidth={2.5} /></a>
+            <h4 className="font-bold text-white text-[15px]">Always Here for You</h4>
+            <div className="text-[12px] text-gray-400 leading-relaxed space-y-1 font-medium">
+              <p>Call Us: 09611 020 888 (8am-10pm, Everyday)</p>
+              <p>Email Us: daily@betopia.com</p>
+              <p className="uppercase mt-2">BETOPIA GROUP E-COMMERCE LIMITED</p>
             </div>
           </div>
 
-          {/* Links Section 1 */}
-          <div className="lg:col-span-2">
-            <h4 className="font-bold text-gray-900 mb-6 text-sm">Get to Know Us</h4>
-            <ul className="space-y-4">
-              <li><Link href="#" className="text-gray-500 hover:text-red-600 text-sm font-semibold transition-colors">Blogs</Link></li>
-              <li><Link href="#" className="text-gray-500 hover:text-red-600 text-sm font-semibold transition-colors">About</Link></li>
-              <li><Link href="#" className="text-gray-500 hover:text-red-600 text-sm font-semibold transition-colors">Contact</Link></li>
+
+
+          {/* Column 3: Customer Service */}
+          <div className="lg:col-span-1">
+            <h4 className="font-bold text-white text-[15px] mb-5">Customer Service</h4>
+            <ul className="space-y-3.5">
+              <li><Link href="#" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Contact Us</Link></li>
+              <li><Link href="#" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Privacy Policy</Link></li>
+              <li><Link href="#" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">FAQ</Link></li>
             </ul>
           </div>
 
-          {/* Links Section 2 */}
-          <div className="lg:col-span-2">
-            <h4 className="font-bold text-gray-900 mb-6 text-sm">Customer Service</h4>
-            <ul className="space-y-4">
-              <li><Link href="#" className="text-gray-500 hover:text-red-600 text-sm font-semibold transition-colors">Privacy Policy</Link></li>
-              <li><Link href="#" className="text-gray-500 hover:text-red-600 text-sm font-semibold transition-colors">Terms and Conditions</Link></li>
-              <li><Link href="#" className="text-gray-500 hover:text-red-600 text-sm font-semibold transition-colors">Shipping and Return Policy</Link></li>
+          {/* Column 4: My Account */}
+          <div className="lg:col-span-1">
+            <h4 className="font-bold text-white text-[15px] mb-5">My Account</h4>
+            <ul className="space-y-3.5">
+              <li><Link href="/orders" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Order History</Link></li>
+              <li><Link href="/profile" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Personal Info</Link></li>
+              <li><Link href="/wishlist" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Wishlist</Link></li>
             </ul>
           </div>
 
-          {/* Details Section */}
-          <div className="lg:col-span-4">
-            <h4 className="font-bold text-gray-900 mb-6 text-sm">Company Details</h4>
-            <ul className="space-y-4">
-              <li className="text-sm font-medium text-gray-500 flex flex-col gap-1">
-                <span className="text-gray-500">Helpline: <span className="text-gray-900 font-bold">09611 020 888</span></span>
-                <span className="text-gray-500">Email: <span className="text-gray-900 font-bold">daily@betopia.com</span></span>
-                <span className="text-gray-500 mt-2 leading-relaxed">
-                  Address: Hakim plaza, 22B Sonargaon road, Dhaka 1205P9VR+9R Dhaka, Bangladesh
-                </span>
-              </li>
-            </ul>
+          {/* Column 5: Payment & Social */}
+          <div className="lg:col-span-1">
+            {/* Pay With */}
+            <h4 className="font-bold text-white text-[15px] mb-4">Pay With</h4>
+            <div className="flex flex-wrap gap-2 mb-8">
+              <div className="h-6 w-10 bg-white border border-gray-200 rounded flex items-center justify-center">
+                <span className="text-[8px] font-bold text-red-500">MasterCard</span>
+              </div>
+              <div className="h-6 w-10 bg-white border border-gray-200 rounded flex items-center justify-center">
+                <span className="text-[8px] font-bold text-blue-600">VISA</span>
+              </div>
+              <div className="h-6 w-10 bg-white border border-gray-200 rounded flex items-center justify-center">
+                <span className="text-[8px] font-bold text-orange-500">Discover</span>
+              </div>
+              <div className="h-6 w-10 bg-white border border-gray-200 rounded flex items-center justify-center">
+                <span className="text-[8px] font-bold text-blue-400">AMEX</span>
+              </div>
+              <div className="h-6 w-10 bg-white border border-gray-200 rounded flex items-center justify-center">
+                <span className="text-[8px] font-bold text-pink-600">bKash</span>
+              </div>
+            </div>
+
+            {/* Follow Us */}
+            <h4 className="font-bold text-white text-[15px] mb-4">Follow Us</h4>
+            <div className="flex items-center gap-3">
+              <a href="#" className="w-8 h-8 bg-[#3b5998] text-white rounded flex items-center justify-center hover:opacity-90 transition-opacity">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg>
+              </a>
+              <a href="#" className="w-8 h-8 bg-[#ff0000] text-white rounded flex items-center justify-center hover:opacity-90 transition-opacity">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                </svg>
+              </a>
+              <a href="#" className="w-8 h-8 bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] text-white rounded flex items-center justify-center hover:opacity-90 transition-opacity">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+              </a>
+            </div>
           </div>
 
         </div>
+
+        {/* Footer Bottom */}
+        <div className="mt-16 pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-[13px] font-medium text-gray-400 text-center md:text-left">
+            © {new Date().getFullYear()} Betopia Daily. All rights reserved.
+          </p>
+          <div className="flex items-center gap-4 text-[13px] font-medium text-gray-400">
+            <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
+          </div>
+        </div>
       </div>
-
-
     </footer>
   );
 }
