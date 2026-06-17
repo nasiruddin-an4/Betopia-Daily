@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { useCartStore } from './useCartStore';
 import { MOCK_USER } from '../lib/data';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://10.10.30.105:8000/api/v1/';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://server.betopiadaily.shop/api/v1/';
 
 export const useUserStore = create(
   persist(
@@ -55,6 +55,10 @@ export const useUserStore = create(
           
           const access_token = data?.accessToken || data?.access_token || data?.token || null;
           const refresh_token = data?.refreshToken || data?.refresh_token || null;
+
+          if (!access_token) {
+            return { success: false, error: 'Login failed: No access token received from server.' };
+          }
 
           // Step 2: Fetch profile from the profile API to match & get user details
           let profileData = null;

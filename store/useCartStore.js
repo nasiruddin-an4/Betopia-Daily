@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { useUserStore } from './useUserStore';
 import { useSidebarStore } from './useSidebarStore';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://10.10.30.105:8000/api/v1/';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://server.betopiadaily.shop/api/v1/';
 
 const getAuthHeaders = () => {
   const token = useUserStore.getState().accessToken;
@@ -38,8 +38,11 @@ export const useCartStore = create((set, get) => ({
 
   // GET /cart/
   initCart: async () => {
-    const { isAuthenticated } = useUserStore.getState();
-    if (!isAuthenticated) {
+    const { isAuthenticated, accessToken, logout } = useUserStore.getState();
+    if (!isAuthenticated || !accessToken) {
+      if (isAuthenticated && !accessToken) {
+        logout();
+      }
       set({ items: [], subtotal: "0.00", total_discount: "0.00", grand_total: "0.00", id: null });
       return;
     }
@@ -65,8 +68,11 @@ export const useCartStore = create((set, get) => ({
 
   // POST /cart/items/
   addItem: async (product) => {
-    const { isAuthenticated } = useUserStore.getState();
-    if (!isAuthenticated) {
+    const { isAuthenticated, accessToken, logout } = useUserStore.getState();
+    if (!isAuthenticated || !accessToken) {
+      if (isAuthenticated && !accessToken) {
+        logout();
+      }
       useSidebarStore.getState().openLoginModal();
       return { success: false, error: 'Not authenticated' };
     }

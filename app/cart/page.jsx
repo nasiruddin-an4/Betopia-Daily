@@ -45,7 +45,7 @@ export default function CartPage() {
         {/* Left Column - Shopping Cart Items */}
         <div className="lg:col-span-8">
           <div className="flex items-center justify-between pb-6 border-b border-gray-200">
-            <h1 className="text-3xl font-extrabold text-[#1c2135] tracking-tight">Shopping Cart</h1>
+            <h1 className="text-3xl font-extrabold text-[#1c2135] tracking-tight">Shopping Bag</h1>
             <span className="text-[17px] font-bold text-[#1c2135]">{itemCount} Items</span>
           </div>
 
@@ -75,7 +75,7 @@ export default function CartPage() {
                 {/* Quantity */}
                 <div className="col-span-3 flex items-center sm:justify-center mt-4 sm:mt-0">
                   <div className="flex items-center bg-[#F4F5F9] rounded-lg overflow-hidden border border-gray-100 shadow-sm">
-                    <button 
+                    <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-black hover:bg-gray-200 transition-colors"
                     >
@@ -84,7 +84,7 @@ export default function CartPage() {
                     <span className="w-8 text-center font-bold text-[#1c2135] text-sm">
                       {item.quantity}
                     </span>
-                    <button 
+                    <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-black hover:bg-gray-200 transition-colors"
                     >
@@ -107,7 +107,7 @@ export default function CartPage() {
                       ৳{parseFloat(item.quantity_wise_price || (item.price * item.quantity)).toFixed(2)}
                     </span>
                   </div>
-                  <button 
+                  <button
                     onClick={() => removeItem(item.id)}
                     className="text-gray-300 hover:text-[#FE6A6B] transition-colors"
                     title="Remove item"
@@ -118,7 +118,7 @@ export default function CartPage() {
               </div>
             ))}
           </div>
-          
+
           <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-bold text-indigo-500 hover:text-indigo-600 transition-colors mt-4">
             <ArrowRight size={16} className="rotate-180" /> Continue Shopping
           </Link>
@@ -130,7 +130,7 @@ export default function CartPage() {
             <h2 className="text-2xl font-extrabold text-[#1c2135] tracking-tight pb-6 border-b border-gray-200 mb-6">
               Order Summary
             </h2>
-            
+
             <div className="flex justify-between items-center mb-8">
               <span className="text-[13px] font-bold text-[#1c2135] uppercase tracking-wide">Items {itemCount}</span>
               <span className="font-bold text-[#1c2135] text-[15px]">৳{subtotal.toFixed(2)}</span>
@@ -156,9 +156,9 @@ export default function CartPage() {
                 Promo Code
               </label>
               <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Enter your code" 
+                <input
+                  type="text"
+                  placeholder="Enter your code"
                   className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3.5 text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-400"
                 />
               </div>
@@ -172,7 +172,7 @@ export default function CartPage() {
               <span className="text-2xl font-extrabold text-[#1c2135] tracking-tight">৳{(subtotal + 5).toFixed(2)}</span>
             </div>
 
-            <button 
+            <button
               onClick={() => {
                 if (isAuthenticated) {
                   router.push('/checkout');

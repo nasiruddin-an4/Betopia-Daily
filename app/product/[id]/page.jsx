@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCartStore } from '../../../store/useCartStore';
 import { useSidebarStore } from '../../../store/useSidebarStore';
-import { ChevronRight, Minus, Plus, ShoppingBag, Clock, ShieldCheck, Truck, RotateCcw, ChevronLeft, Maximize2 } from 'lucide-react';
+import { ChevronRight, Minus, Plus, ShoppingBag, Clock, ShieldCheck, Truck, Search, RotateCcw, ChevronLeft, Maximize2 } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 
@@ -79,6 +79,41 @@ export default function ProductDetailsPage() {
     return parseFloat(product.discount_amount) || 0;
   }, [product]);
 
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    if (!product || !product.is_hot_deal || !product.hot_deal_end) return;
+
+    const endDate = new Date(product.hot_deal_end).getTime();
+
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const distance = endDate - now;
+
+      if (distance < 0) {
+        setTimeLeft('00:00:00:00 Left');
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      const d = days < 10 ? `0${days}` : days;
+      const h = hours < 10 ? `0${hours}` : hours;
+      const m = minutes < 10 ? `0${minutes}` : minutes;
+      const s = seconds < 10 ? `0${seconds}` : seconds;
+
+      setTimeLeft(`${d}:${h}:${m}:${s} Left`);
+    };
+
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(timer);
+  }, [product]);
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -129,7 +164,7 @@ export default function ProductDetailsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 mb-20">
         {/* Left: Product Image */}
         <div className="space-y-4">
-          <div className="relative aspect-square rounded-3xl overflow-hidden bg-white border border-gray-100 group flex items-center justify-center p-8">
+          <div className="relative aspect-square overflow-hidden bg-white border border-gray-100 group flex items-center justify-center p-8">
             <img 
               src={product.first_image || (product.images?.[0]?.image) || '/placeholder.png'} 
               alt={product.name}
@@ -137,93 +172,83 @@ export default function ProductDetailsPage() {
               onError={(e) => { e.target.src = 'https://placehold.co/600x600?text=No+Image'; }}
             />
             {discountAmount > 0 && (
-              <div className="absolute top-6 left-6 bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded-r-xl rounded-tl-xl shadow-sm z-10">
-                {discountAmount} TK OFF
+              <div 
+                className="absolute top-0 left-6 bg-[#E50000] text-white font-bold px-2 pt-2 pb-3 flex flex-col items-center justify-center z-10 w-[42px]" 
+                style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 83% 90%, 66% 100%, 50% 90%, 33% 100%, 16% 90%, 0 100%)" }}
+              >
+                <span className="text-[10px] leading-tight font-extrabold">৳{discountAmount}</span>
+                <span className="text-[9px] leading-tight font-extrabold mt-0.5">OFF</span>
               </div>
             )}
-            <button className="absolute top-6 right-6 p-3 bg-white/80 backdrop-blur shadow-sm rounded-full text-gray-600 hover:text-[#0D9488] transition-all active:scale-95 z-10">
-              <Maximize2 size={20} />
+            <button className="absolute bottom-4 right-4 p-2 text-gray-400 hover:text-gray-900 transition-all z-10">
+              <Search size={22} strokeWidth={1.5} />
             </button>
           </div>
+          
+          {/* Thumbnails */}
+          {(product.images && product.images.length > 0) && (
+            <div className="flex items-center gap-3 overflow-x-auto py-1">
+              {product.images.map((img, idx) => (
+                <button key={img.id || idx} className={`w-20 h-20 border rounded-sm p-2 flex-shrink-0 bg-white ${img.is_primary || idx === 0 ? 'border-gray-300' : 'border-gray-100'}`}>
+                  <img src={img.image} alt="thumbnail" className="w-full h-full object-contain" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right: Product Info */}
         <div className="flex flex-col">
           <div className="mb-6">
-             <div className="flex items-center justify-between mb-4">
-               <span className="px-3 py-1 bg-teal-50 text-[#0D9488] text-xs font-bold rounded-full uppercase tracking-widest">
-                 {categoryName || 'Product'}
-               </span>
-               <div className="flex items-center gap-2">
-                 <button className="p-2 text-gray-400 hover:text-[#0D9488] transition-colors"><ChevronLeft size={20} /></button>
-                 <button className="p-2 text-gray-400 hover:text-[#0D9488] transition-colors"><ChevronRight size={20} /></button>
-               </div>
-             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+            <h1 className="text-2xl font-bold text-gray-900 mb-6 leading-tight">
               {product.name}
             </h1>
             
-            <div className="flex items-baseline gap-3 mb-2 mt-4">
+            {product.is_hot_deal && product.hot_deal_end && timeLeft && (
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                 <span className="font-bold text-gray-900">Hurry Up! Sales Ends In</span>
+                 <div className="bg-[#FFD700] px-4 py-1.5 font-bold text-gray-900 text-sm rounded-sm tabular-nums tracking-wide">
+                   {timeLeft}
+                 </div>
+              </div>
+            )}
+            
+            <div className="flex items-end gap-2 mb-8">
               {discountAmount > 0 && (
-                <span className="text-gray-400 text-xl line-through font-medium">৳{oldPrice}</span>
+                <span className="text-gray-400 text-lg line-through font-medium">৳{oldPrice}</span>
               )}
-              <span className="text-red-600 font-bold text-3xl">৳{currentPrice}</span>
-              <span className="text-sm text-gray-500 ml-2">{selectedUnit}</span>
+              <span className="text-[#E50000] font-bold text-2xl leading-none">৳{currentPrice}</span>
+              <span className="text-sm font-medium text-gray-400 ml-1">Per {selectedUnit || 'Piece'}</span>
             </div>
           </div>
 
-          <div className="prose prose-sm text-gray-600 mb-8 max-w-none">
-            <p>{product.description || 'No description available for this product.'}</p>
-          </div>
-
-          {/* Unit Selection */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-sm font-bold text-gray-900 uppercase tracking-widest">Weight / Unit:</span>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                className="px-6 py-2.5 min-w-[80px] text-sm font-bold border transition-all border-gray-900 bg-white text-gray-900 ring-1 ring-gray-900 rounded-lg"
-              >
-                {selectedUnit}
-              </button>
-            </div>
-          </div>
-
-          {/* Quantity & Add to Cart */}
-          <div className="flex flex-col sm:flex-row items-stretch gap-4 mb-10">
-            <div className="flex items-center border-2 border-gray-100 rounded-xl overflow-hidden h-14 bg-white">
-              <button 
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-4 h-full flex items-center justify-center hover:bg-gray-50 text-gray-500 transition-colors"
-              >
-                <Minus size={18} />
-              </button>
-              <input 
-                type="number" 
-                value={quantity} 
-                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-12 text-center font-bold text-gray-900 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-              <button 
-                onClick={() => setQuantity(quantity + 1)}
-                className="px-4 h-full flex items-center justify-center hover:bg-gray-50 text-gray-500 transition-colors border-l border-gray-100"
-              >
-                <Plus size={18} />
-              </button>
-            </div>
-
+          {/* Add to Cart */}
+          <div className="mb-10">
             <button
               onClick={handleAddToCart}
-              className="flex-1 bg-brand-bright-orange hover:bg-brand-coral text-white font-bold px-8 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-3 h-14"
+              className="bg-[#E50000] hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-full transition-all active:scale-[0.98] flex items-center justify-center gap-2 max-w-[200px]"
             >
-              <ShoppingBag size={20} />
+              <Plus size={18} strokeWidth={2.5} />
               Add to Bag
             </button>
           </div>
 
+          {/* Tags */}
+          {product.tags && product.tags.length > 0 && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-gray-900 text-[15px]">Product Tags :</h4>
+              <div className="flex flex-wrap gap-2">
+                 {product.tags.map((tag) => (
+                   <span key={tag.id} className="px-3 py-1 bg-[#F0F8FF] text-[#00A1E0] text-[13px] font-medium rounded-sm">
+                     {tag.name}
+                   </span>
+                 ))}
+              </div>
+            </div>
+          )}
+
           {/* Delivery & Service Info */}
-          <div className="space-y-4 pt-8 border-t border-gray-100">
+          <div className="space-y-4 pt-8 mt-6 border-t border-gray-100">
             <h4 className="font-bold text-gray-900 text-sm uppercase tracking-widest">Flat shipping Rate All Over Dhaka</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <div className="flex items-center gap-3 text-gray-600">
@@ -240,6 +265,17 @@ export default function ProductDetailsPage() {
                </div>
             </div>
           </div>
+
+          {/* Product Description */}
+          {product.description && (
+            <div className="mt-8 pt-6 border-t border-gray-100">
+              <h4 className="font-bold text-gray-900 text-[15px] mb-3">Product Description :</h4>
+              <div 
+                className="prose prose-sm text-gray-600 max-w-none"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
+            </div>
+          )}
         </div>
       </div>
 

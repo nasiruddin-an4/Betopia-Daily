@@ -50,7 +50,7 @@ export default function CartSidebar({ isOpen, onClose }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-8 pb-6">
-          <h2 className="text-2xl font-serif text-gray-800">Shopping cart</h2>
+          <h2 className="text-2xl font-serif text-gray-800">Shopping Bag</h2>
           <button
             onClick={onClose}
             className="p-1 text-gray-400 hover:text-gray-900 transition-colors"
