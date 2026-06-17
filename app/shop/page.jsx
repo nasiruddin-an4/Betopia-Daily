@@ -1,18 +1,36 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Search, Filter, SlidersHorizontal, Grid2X2, LayoutGrid, ShoppingBag, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from '../../lib/api';
 import { useCartStore } from '../../store/useCartStore';
 import { useSidebarStore } from '../../store/useSidebarStore';
 
 export default function ShopPage() {
-  const [activeCategory, setActiveCategory] = useState('');
-  const [activeBrand, setActiveBrand] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchInput, setSearchInput] = useState('');
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <ShopContent />
+    </Suspense>
+  );
+}
+
+function ShopContent() {
+  const searchParams = useSearchParams();
+  
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || '');
+  const [activeBrand, setActiveBrand] = useState(searchParams.get('brand') || '');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [sortBy, setSortBy] = useState('default');
+
+  useEffect(() => {
+    setActiveBrand(searchParams.get('brand') || '');
+    setActiveCategory(searchParams.get('category') || '');
+    setSearchQuery(searchParams.get('search') || '');
+    setSearchInput(searchParams.get('search') || '');
+  }, [searchParams]);
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -25,6 +43,7 @@ export default function ShopPage() {
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isBrandOpen, setIsBrandOpen] = useState(true);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useSidebarStore((state) => state.openCart);
@@ -112,72 +131,126 @@ export default function ShopPage() {
     setPage(1);
   };
 
+  const renderFilters = () => (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm lg:sticky lg:top-28">
+      {/* Categories Accordion */}
+      <div
+        className="flex items-center justify-between p-4 border-b border-gray-100 bg-white cursor-pointer select-none"
+        onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+      >
+        <h3 className="font-semibold text-gray-900 text-base">Categories</h3>
+        {isCategoryOpen ? <ChevronUp size={18} className="text-gray-600" /> : <ChevronDown size={18} className="text-gray-600" />}
+      </div>
+
+      {isCategoryOpen && (
+        <div className="px-4 pb-3 pt-2 bg-white space-y-0.5">
+          {categories.map((category) => (
+            <label key={category.slug || category.id} className="flex items-center gap-3 py-1.5 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={activeCategory === category.slug}
+                onChange={() => {
+                  handleCategorySelect(activeCategory === category.slug ? '' : category.slug);
+                  setIsMobileFilterOpen(false);
+                }}
+                className="w-4 h-4 rounded border-gray-300 text-[#0D9488] focus:ring-[#0D9488] cursor-pointer"
+              />
+              <span className={`text-sm ${activeCategory === category.slug ? 'text-gray-900 font-medium' : 'text-gray-600 group-hover:text-gray-900'}`}>
+                {category.name}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
+
+      {/* Brands Accordion */}
+      <div
+        className="flex items-center justify-between p-4 border-t border-b border-gray-100 bg-white cursor-pointer select-none"
+        onClick={() => setIsBrandOpen(!isBrandOpen)}
+      >
+        <h3 className="font-semibold text-gray-900 text-base">Brand</h3>
+        {isBrandOpen ? <ChevronUp size={18} className="text-gray-600" /> : <ChevronDown size={18} className="text-gray-600" />}
+      </div>
+
+      {isBrandOpen && (
+        <div className="px-4 pb-3 pt-2 bg-white space-y-0.5">
+          {brands.map((brand) => (
+            <label key={brand.slug || brand.id} className="flex items-center gap-3 py-1.5 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={activeBrand === brand.slug}
+                onChange={() => {
+                  handleBrandSelect(activeBrand === brand.slug ? '' : brand.slug);
+                  setIsMobileFilterOpen(false);
+                }}
+                className="w-4 h-4 rounded border-gray-300 text-[#0D9488] focus:ring-[#0D9488] cursor-pointer"
+              />
+              <span className={`text-sm ${activeBrand === brand.slug ? 'text-gray-900 font-medium' : 'text-gray-600 group-hover:text-gray-900'}`}>
+                {brand.name}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Sidebar Filters */}
-        <div className="lg:col-span-3">
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm sticky top-28">
-
-            {/* Categories Accordion */}
-            <div
-              className="flex items-center justify-between p-4 border-b border-gray-100 bg-white cursor-pointer select-none"
-              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-            >
-              <h3 className="font-semibold text-gray-900 text-base">Categories</h3>
-              {isCategoryOpen ? <ChevronUp size={18} className="text-gray-600" /> : <ChevronDown size={18} className="text-gray-600" />}
-            </div>
-
-            {isCategoryOpen && (
-              <div className="px-4 pb-3 pt-2 bg-white space-y-0.5">
-                {categories.map((category) => (
-                  <label key={category.slug || category.id} className="flex items-center gap-3 py-1.5 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={activeCategory === category.slug}
-                      onChange={() => handleCategorySelect(activeCategory === category.slug ? '' : category.slug)}
-                      className="w-4 h-4 rounded border-gray-300 text-[#0D9488] focus:ring-[#0D9488] cursor-pointer"
-                    />
-                    <span className={`text-sm ${activeCategory === category.slug ? 'text-gray-900 font-medium' : 'text-gray-600 group-hover:text-gray-900'}`}>
-                      {category.name}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {/* Brands Accordion */}
-            <div
-              className="flex items-center justify-between p-4 border-t border-b border-gray-100 bg-white cursor-pointer select-none"
-              onClick={() => setIsBrandOpen(!isBrandOpen)}
-            >
-              <h3 className="font-semibold text-gray-900 text-base">Brand</h3>
-              {isBrandOpen ? <ChevronUp size={18} className="text-gray-600" /> : <ChevronDown size={18} className="text-gray-600" />}
-            </div>
-
-            {isBrandOpen && (
-              <div className="px-4 pb-3 pt-2 bg-white space-y-0.5">
-                {brands.map((brand) => (
-                  <label key={brand.slug || brand.id} className="flex items-center gap-3 py-1.5 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={activeBrand === brand.slug}
-                      onChange={() => handleBrandSelect(activeBrand === brand.slug ? '' : brand.slug)}
-                      className="w-4 h-4 rounded border-gray-300 text-[#0D9488] focus:ring-[#0D9488] cursor-pointer"
-                    />
-                    <span className={`text-sm ${activeBrand === brand.slug ? 'text-gray-900 font-medium' : 'text-gray-600 group-hover:text-gray-900'}`}>
-                      {brand.name}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-
-          </div>
+        <div className="hidden lg:block lg:col-span-3">
+          {renderFilters()}
         </div>
 
         {/* Dynamic Product Grid */}
         <div className="lg:col-span-9">
+
+          {/* Mobile Search & Filter Bar */}
+          <div className="lg:hidden flex flex-row items-center gap-3 mb-6">
+            <button 
+              onClick={() => setIsMobileFilterOpen(true)}
+              className="p-3 bg-white border border-gray-200 rounded-xl text-gray-600 hover:text-[#0D9488] transition-colors flex items-center justify-center flex-shrink-0"
+            >
+              <Filter size={20} />
+            </button>
+            <form onSubmit={handleSearchSubmit} className="flex-1 relative">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0D9488]/20 focus:border-[#0D9488] transition-all"
+              />
+              <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0D9488]">
+                <Search size={18} />
+              </button>
+            </form>
+          </div>
+
+          {/* Mobile Filter Drawer */}
+          {isMobileFilterOpen && (
+            <div className="fixed inset-0 z-[60] lg:hidden flex">
+              <div 
+                className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" 
+                onClick={() => setIsMobileFilterOpen(false)}
+              ></div>
+              <div className="relative w-4/5 max-w-[320px] bg-gray-50 h-full flex flex-col shadow-2xl animate-in slide-in-from-left duration-300">
+                <div className="p-4 bg-white border-b border-gray-100 flex items-center justify-between sticky top-0 z-10">
+                  <h2 className="text-lg font-bold text-gray-900">Filters</h2>
+                  <button 
+                    onClick={() => setIsMobileFilterOpen(false)} 
+                    className="p-2 text-gray-500 hover:text-[#0D9488] hover:bg-teal-50 rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
+                </div>
+                <div className="p-4 overflow-y-auto flex-1">
+                   {renderFilters()}
+                </div>
+              </div>
+            </div>
+          )}
 
 
           {loading ? (
@@ -203,8 +276,12 @@ export default function ShopPage() {
                           onError={(e) => { e.target.src = 'https://placehold.co/400x300?text=No+Image'; }}
                         />
                         {discount > 0 && (
-                          <div className="absolute top-3 left-3 bg-red-500 text-white text-[11px] font-bold px-2 py-1.5 rounded-r-xl rounded-tl-xl shadow-sm z-10">
-                            {discount} TK OFF
+                          <div 
+                            className="absolute top-0 left-4 bg-[#E50000] text-white font-bold px-1.5 pt-1.5 pb-2 flex flex-col items-center justify-center z-10 w-[36px]" 
+                            style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 83% 90%, 66% 100%, 50% 90%, 33% 100%, 16% 90%, 0 100%)" }}
+                          >
+                            <span className="text-[10px] leading-tight font-extrabold">৳{discount}</span>
+                            <span className="text-[8px] leading-tight font-extrabold mt-0.5">OFF</span>
                           </div>
                         )}
                       </Link>

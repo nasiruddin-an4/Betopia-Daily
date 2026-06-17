@@ -305,8 +305,12 @@ export default function ProductDetailsPage() {
                       onError={(e) => { e.target.src = 'https://placehold.co/400x300?text=No+Image'; }}
                     />
                     {pDiscount > 0 && (
-                      <div className="absolute top-3 left-3 bg-red-500 text-white text-[11px] font-bold px-2 py-1.5 rounded-r-xl rounded-tl-xl shadow-sm z-10">
-                        {pDiscount} TK OFF
+                      <div 
+                        className="absolute top-0 left-4 bg-[#E50000] text-white font-bold px-1.5 pt-1.5 pb-2 flex flex-col items-center justify-center z-10 w-[36px]" 
+                        style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 83% 90%, 66% 100%, 50% 90%, 33% 100%, 16% 90%, 0 100%)" }}
+                      >
+                        <span className="text-[10px] leading-tight font-extrabold">৳{pDiscount}</span>
+                        <span className="text-[8px] leading-tight font-extrabold mt-0.5">OFF</span>
                       </div>
                     )}
                   </Link>

@@ -80,8 +80,17 @@ export default function RecommendationCarousel() {
             key={product.product_id}
             className="min-w-[calc(100%/2)] sm:min-w-[calc((100%-16px)/3)] lg:min-w-[calc((100%-64px)/5)] bg-white border border-gray-100 rounded-2xl p-4 flex flex-col snap-start hover:shadow-lg transition-all duration-300"
           >
-            <Link href={`/product/${product.product_id}`} className="aspect-square mb-4 flex items-center justify-center overflow-hidden block">
+            <Link href={`/product/${product.product_id}`} className="relative aspect-square mb-4 flex items-center justify-center overflow-hidden block">
               <img src={product.image_url} className="w-full h-full object-contain hover:scale-105 transition-transform duration-500" alt={product.name} />
+              {product.discount_pct && product.discount_pct > 0 && (
+                <div 
+                  className="absolute top-0 left-2 bg-[#E50000] text-white font-bold px-1.5 pt-1.5 pb-2 flex flex-col items-center justify-center z-10 w-[36px]" 
+                  style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 83% 90%, 66% 100%, 50% 90%, 33% 100%, 16% 90%, 0 100%)" }}
+                >
+                  <span className="text-[10px] leading-tight font-extrabold">{product.discount_pct}%</span>
+                  <span className="text-[8px] leading-tight font-extrabold mt-0.5">OFF</span>
+                </div>
+              )}
             </Link>
 
             <div className="flex-1 space-y-2">
@@ -90,13 +99,13 @@ export default function RecommendationCarousel() {
                   {product.name}
                 </h3>
               </Link>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-sm font-bold text-gray-900 italic">৳{product.unit_price}</span>
-                {product.discount_pct && (
-                  <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1 rounded">
-                    {product.discount_pct}% OFF
+              <div className="flex flex-wrap items-baseline gap-2 mb-2 mt-1">
+                {product.discount_pct && product.discount_pct > 0 && (
+                  <span className="text-gray-400 text-[11px] line-through font-medium">
+                    ৳{Math.round(product.unit_price / (1 - product.discount_pct / 100))}
                   </span>
                 )}
+                <span className="text-sm font-bold text-gray-900 italic">৳{product.unit_price}</span>
               </div>
             </div>
 

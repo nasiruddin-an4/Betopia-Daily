@@ -113,6 +113,15 @@ export default function HotDealsCarousel() {
                         className="object-contain w-full h-full"
                         onError={(e) => { e.target.src = 'https://placehold.co/400x300?text=No+Image'; }}
                       />
+                      {discount > 0 && (
+                        <div 
+                          className="absolute top-0 left-4 bg-[#E50000] text-white font-bold px-1.5 pt-1.5 pb-2 flex flex-col items-center justify-center z-10 w-[36px]" 
+                          style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 83% 90%, 66% 100%, 50% 90%, 33% 100%, 16% 90%, 0 100%)" }}
+                        >
+                          <span className="text-[10px] leading-tight font-extrabold">৳{discount}</span>
+                          <span className="text-[8px] leading-tight font-extrabold mt-0.5">OFF</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Content */}
