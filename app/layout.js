@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import AuthGuard from "../components/AuthGuard";
+import ScrollToTop from "./components/ScrollToTop";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
           </AuthGuard>
         </main>
         <Footer />
+        <ScrollToTop />
       </body>
     </html>
   );

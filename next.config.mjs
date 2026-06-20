@@ -4,7 +4,7 @@ const nextConfig = {
     return [
       {
         source: '/api/erp/:path*',
-        destination: 'https://dev.erp.betopialimited.com/:path*',
+        destination: 'https://erp.betopiagroup.com/:path*',
       },
     ];
   },

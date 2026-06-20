@@ -5,6 +5,14 @@ import { MOCK_USER } from '../lib/data';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://server.betopiadaily.shop/api/v1/';
 
+// Helper to ensure avatar URLs are absolute based on BASE_URL
+const processAvatarUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  const host = BASE_URL.split('/api')[0];
+  return `${host}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export const useUserStore = create(
   persist(
     (set, get) => ({
@@ -60,7 +68,10 @@ export const useUserStore = create(
             return { success: false, error: 'Login failed: No access token received from server.' };
           }
 
-          // Step 2: Fetch profile from the profile API to match & get user details
+          const erpUser = data?.user || data?.result || data?.data || data || { email };
+          const extracted_employee_id = erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null;
+
+          // Step 2: Fetch profile from the profile API to match & get user details FIRST
           let profileData = null;
           try {
             const headers = { 'Content-Type': 'application/json' };
@@ -85,13 +96,46 @@ export const useUserStore = create(
             console.error('Profile fetch error:', profileErr);
           }
 
+          // Step 3: Post to backend to create profile if it doesn't exist
+          if (!profileData) {
+            try {
+              const formData = new FormData();
+              formData.append('email', erpUser.email || email);
+              formData.append('user_type', erpUser.user_type || 'employee');
+              formData.append('company', erpUser.company || '');
+              if (extracted_employee_id) formData.append('employee_id', parseInt(extracted_employee_id));
+              formData.append('company_address', erpUser.company_address || '');
+              formData.append('access_token', access_token);
+              formData.append('phone', erpUser.phone || '');
+
+              const createRes = await fetch(`${BASE_URL}profile/`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${access_token}`
+                  // No Content-Type for FormData
+                },
+                body: formData
+              });
+              
+              if (!createRes.ok) {
+                const errText = await createRes.text();
+                console.error('Create profile failed:', createRes.status, errText);
+                alert(`Profile Creation Failed: ${createRes.status} ${errText}`);
+              }
+            } catch (createProfileErr) {
+              console.error('Create profile network error:', createProfileErr);
+            }
+          }
+
           // Build the user object by merging ERP login response + profile data
-          const erpUser = data?.user || data?.result || data?.data || { ...MOCK_USER, email };
           
+
           // Determine role and type from profile API
           const userType = profileData?.user_type || erpUser?.user_type || 'employee';
           const userRole = profileData?.role || erpUser?.role || userType;
           
+          const rawAvatar = profileData?.avatar || erpUser?.avatar || '';
+
           const userData = {
             ...erpUser,
             ...(profileData || {}),
@@ -99,9 +143,12 @@ export const useUserStore = create(
             name: profileData?.name || erpUser?.name || email.split('@')[0],
             first_name: profileData?.first_name || profileData?.name?.split(' ')[0] || erpUser?.name?.split(' ')[0] || email.split('@')[0],
             company: profileData?.company || erpUser?.company || '',
+            company_id: profileData?.company_id || erpUser?.company_id || null,
+            companies: profileData?.companies || erpUser?.companies || [],
             user_type: userType,
             role: userRole,
-            employee_id: profileData?.employee_id || erpUser?.employee_id || erpUser?.erp_employee_id || null,
+            employee_id: profileData?.employee_id || erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null,
+            avatar: processAvatarUrl(rawAvatar)
           };
           
           set({ 
@@ -126,7 +173,16 @@ export const useUserStore = create(
       },
       deductSalaryCredit: (amount) => set((state) => ({
         user: state.user ? { ...state.user, salary_credit_balance: state.user.salary_credit_balance - amount } : null
-      }))
+      })),
+      updateUser: (newUserData) => set((state) => {
+        let processedData = { ...newUserData };
+        if (processedData.avatar) {
+          processedData.avatar = processAvatarUrl(processedData.avatar);
+        }
+        return {
+          user: state.user ? { ...state.user, ...processedData } : null
+        };
+      })
     }),
     {
       name: 'betopia-daily-user',

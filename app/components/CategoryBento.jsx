@@ -76,13 +76,13 @@ export default function CategoryBento() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
           {[...Array(8)].map((_, index) => (
             <div key={`skeleton-${index}`} className="h-24 bg-gray-200 rounded-xl"></div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {displayData.map((item, index) => {
             const href = activeTab === 'categories'
               ? `/shop?category=${item.slug}`

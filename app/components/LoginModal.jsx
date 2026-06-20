@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useUserStore } from '../../store/useUserStore';
-import { ArrowRight, ShieldCheck, ArrowLeft, X } from 'lucide-react';
+import { ArrowRight, ShieldCheck, ArrowLeft, X, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginModal({ isOpen, onClose }) {
   const [email, setEmail] = useState('');
@@ -10,7 +10,15 @@ export default function LoginModal({ isOpen, onClose }) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const login = useUserStore((state) => state.login);
+
+  React.useEffect(() => {
+    const savedEmail = localStorage.getItem('betopia_last_email');
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -28,6 +36,7 @@ export default function LoginModal({ isOpen, onClose }) {
     setIsLoading(false);
 
     if (result.success) {
+      localStorage.setItem('betopia_last_email', email);
       onClose();
     } else {
       setError(result.error || 'Login failed');
@@ -126,6 +135,8 @@ export default function LoginModal({ isOpen, onClose }) {
                   </label>
                   <input
                     type="email"
+                    name="email"
+                    autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your.name@betopiagroup.com"
@@ -137,13 +148,24 @@ export default function LoginModal({ isOpen, onClose }) {
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
                     Password
                   </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 transition-all outline-none font-medium placeholder-gray-400"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 transition-all outline-none font-medium placeholder-gray-400 pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 <button

@@ -26,24 +26,27 @@ export default function Footer() {
 
 
 
-          {/* Column 3: Customer Service */}
-          <div className="lg:col-span-1">
-            <h4 className="font-bold text-white text-[15px] mb-5">Customer Service</h4>
-            <ul className="space-y-3.5">
-              <li><Link href="#" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Contact Us</Link></li>
-              <li><Link href="#" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Privacy Policy</Link></li>
-              <li><Link href="#" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">FAQ</Link></li>
-            </ul>
-          </div>
+          {/* Group: Customer Service & My Account */}
+          <div className="grid grid-cols-2 gap-4 lg:gap-8 lg:col-span-2">
+            {/* Column 3: Customer Service */}
+            <div>
+              <h4 className="font-bold text-white text-[15px] mb-5">Customer Service</h4>
+              <ul className="space-y-3.5">
+                <li><Link href="#" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Contact Us</Link></li>
+                <li><Link href="#" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Privacy Policy</Link></li>
+                <li><Link href="#" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">FAQ</Link></li>
+              </ul>
+            </div>
 
-          {/* Column 4: My Account */}
-          <div className="lg:col-span-1">
-            <h4 className="font-bold text-white text-[15px] mb-5">My Account</h4>
-            <ul className="space-y-3.5">
-              <li><Link href="/orders" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Order History</Link></li>
-              <li><Link href="/profile" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Personal Info</Link></li>
-              <li><Link href="/wishlist" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Wishlist</Link></li>
-            </ul>
+            {/* Column 4: My Account */}
+            <div>
+              <h4 className="font-bold text-white text-[15px] mb-5">My Account</h4>
+              <ul className="space-y-3.5">
+                <li><Link href="/orders" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Order History</Link></li>
+                <li><Link href="/profile" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Personal Info</Link></li>
+                <li><Link href="/wishlist" className="text-[13px] text-gray-400 font-medium hover:text-[#FA8B24] transition-colors">Wishlist</Link></li>
+              </ul>
+            </div>
           </div>
 
           {/* Column 5: Payment & Social */}
