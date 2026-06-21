@@ -167,6 +167,133 @@ export const useUserStore = create(
           return { success: false, error: 'Network error or server unreachable' };
         }
       },
+      ssoLogin: async (msalAccessToken) => {
+        try {
+          // Step 1: Authenticate with DRF using MSAL access token
+          const res = await fetch(`${BASE_URL}auth/sso/login/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              access_token: msalAccessToken,
+              appVersion: "1.0.0",
+              deviceId: "2382832"
+            })
+          });
+
+          if (!res.ok) {
+            const errText = await res.text();
+            console.error('SSO Login failed:', res.status, errText);
+            return { success: false, error: 'SSO Login failed. Invalid token or server error.' };
+          }
+          
+          let data;
+          try {
+            data = await res.json();
+          } catch(e) {
+             data = {};
+          }
+          
+          const access_token = data?.accessToken || data?.access_token || data?.token || null;
+          const refresh_token = data?.refreshToken || data?.refresh_token || null;
+
+          if (!access_token) {
+            return { success: false, error: 'SSO Login failed: No access token received from server.' };
+          }
+
+          const erpUser = data?.user || data?.result || data?.data || data;
+          const email = erpUser?.email || erpUser?.login;
+          const extracted_employee_id = erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null;
+
+          // Step 2: Fetch profile from the profile API to match & get user details FIRST
+          let profileData = null;
+          try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (access_token) {
+              headers['Authorization'] = `Bearer ${access_token}`;
+            }
+            const profileRes = await fetch(`${BASE_URL}profile/`, {
+              method: 'GET',
+              headers
+            });
+            if (profileRes.ok) {
+              const profileJson = await profileRes.json();
+              const profiles = Array.isArray(profileJson) ? profileJson 
+                : profileJson?.data ? (Array.isArray(profileJson.data) ? profileJson.data : [profileJson.data])
+                : profileJson?.results ? profileJson.results 
+                : [profileJson];
+              
+              profileData = profiles.find(p => p.email === email) || profiles[0] || null;
+            }
+          } catch (profileErr) {
+            console.error('Profile fetch error:', profileErr);
+          }
+
+          // Step 3: Post to backend to create profile if it doesn't exist
+          if (!profileData) {
+            try {
+              const formData = new FormData();
+              formData.append('email', erpUser.email || email);
+              formData.append('user_type', erpUser.user_type || 'employee');
+              formData.append('company', erpUser.company || '');
+              if (extracted_employee_id) formData.append('employee_id', parseInt(extracted_employee_id));
+              formData.append('company_address', erpUser.company_address || '');
+              formData.append('access_token', access_token);
+              formData.append('phone', erpUser.phone || '');
+
+              const createRes = await fetch(`${BASE_URL}profile/`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${access_token}`
+                },
+                body: formData
+              });
+              
+              if (!createRes.ok) {
+                const errText = await createRes.text();
+                console.error('Create profile failed:', createRes.status, errText);
+              }
+            } catch (createProfileErr) {
+              console.error('Create profile network error:', createProfileErr);
+            }
+          }
+
+          const userType = profileData?.user_type || erpUser?.user_type || 'employee';
+          const userRole = profileData?.role || erpUser?.role || userType;
+          const rawAvatar = profileData?.avatar || erpUser?.avatar || '';
+
+          const userData = {
+            ...erpUser,
+            ...(profileData || {}),
+            email: email,
+            name: profileData?.name || erpUser?.name || email?.split('@')[0],
+            first_name: profileData?.first_name || profileData?.name?.split(' ')[0] || erpUser?.name?.split(' ')[0] || email?.split('@')[0],
+            company: profileData?.company || erpUser?.company || '',
+            company_id: profileData?.company_id || erpUser?.company_id || null,
+            companies: profileData?.companies || erpUser?.companies || [],
+            user_type: userType,
+            role: userRole,
+            employee_id: profileData?.employee_id || erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null,
+            avatar: processAvatarUrl(rawAvatar)
+          };
+          
+          set({ 
+            user: userData, 
+            accessToken: access_token,
+            refreshToken: refresh_token,
+            isAuthenticated: true 
+          });
+          
+          useCartStore.getState().initCart();
+          
+          return { success: true };
+        } catch (error) {
+          console.error('SSO Login error:', error);
+          return { success: false, error: 'Network error or server unreachable' };
+        }
+      },
       logout: () => {
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
         useCartStore.getState().initCart(); // This will clear the items since isAuthenticated is now false

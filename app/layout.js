@@ -5,6 +5,8 @@ import Footer from "./components/Footer";
 import AuthGuard from "../components/AuthGuard";
 import ScrollToTop from "./components/ScrollToTop";
 
+import MsalProviderWrapper from "./components/MsalProviderWrapper";
+
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -20,14 +22,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="light">
       <body className={`${outfit.variable} antialiased min-h-screen flex flex-col bg-white font-sans overflow-x-hidden`}>
-        <Navbar />
-        <main className="flex-1 w-full container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <AuthGuard>
-            {children}
-          </AuthGuard>
-        </main>
-        <Footer />
-        <ScrollToTop />
+        <MsalProviderWrapper>
+          <Navbar />
+          <main className="flex-1 w-full container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <AuthGuard>
+              {children}
+            </AuthGuard>
+          </main>
+          <Footer />
+          <ScrollToTop />
+        </MsalProviderWrapper>
       </body>
     </html>
   );

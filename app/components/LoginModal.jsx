@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useUserStore } from '../../store/useUserStore';
 import { ArrowRight, ShieldCheck, ArrowLeft, X, Eye, EyeOff } from 'lucide-react';
+import { useMsal } from "@azure/msal-react";
+import { loginRequest } from "../../lib/msalConfig";
 
 export default function LoginModal({ isOpen, onClose }) {
   const [email, setEmail] = useState('');
@@ -12,6 +14,27 @@ export default function LoginModal({ isOpen, onClose }) {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const login = useUserStore((state) => state.login);
+  const ssoLogin = useUserStore((state) => state.ssoLogin);
+  const { instance } = useMsal();
+
+  const handleSSOLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      // This will navigate the current tab to Microsoft's login page
+      await instance.loginRedirect(loginRequest);
+      
+      // The code below will not run because the page will navigate away.
+      // We will capture the token in MsalProviderWrapper when the page reloads.
+    } catch (e) {
+      console.error(e);
+      setIsLoading(false);
+      if (e.name !== 'BrowserAuthError') {
+         setError('Failed to sign in with Microsoft.');
+      }
+    }
+  };
 
   React.useEffect(() => {
     const savedEmail = localStorage.getItem('betopia_last_email');
@@ -83,15 +106,37 @@ export default function LoginModal({ isOpen, onClose }) {
                 Sign in with your organizational account to continue
               </p>
 
+              {/* Error Message for SSO */}
+              {error && !showEmailForm && (
+                <div className="w-full mb-4 p-3 bg-red-50 border border-red-100 text-red-500 rounded-xl text-sm font-semibold text-center">
+                  {error}
+                </div>
+              )}
+
               {/* SSO Button */}
               <button
-                onClick={() => setShowEmailForm(true)}
-                className="w-full bg-[#FA8B24] hover:bg-[#E87A13] text-white font-semibold text-base py-3.5 px-6 rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+                onClick={handleSSOLogin}
+                disabled={isLoading}
+                className="w-full bg-[#FA8B24] hover:bg-[#E87A13] text-white font-semibold text-base py-3.5 px-6 rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <svg viewBox="0 0 88 88" className="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 12.402l35.687-4.86v34.22H0V12.402zm35.687 33.155v34.406L0 75.14V45.557h35.687zM39.638 6.425L88 0v41.76H39.638V6.425zm0 39.132H88V88L39.638 81.65V45.557z" />
-                </svg>
-                Sign in with Betopia SSO
+                {isLoading && !showEmailForm ? (
+                  <span className="animate-pulse">Connecting...</span>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 88 88" className="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M0 12.402l35.687-4.86v34.22H0V12.402zm35.687 33.155v34.406L0 75.14V45.557h35.687zM39.638 6.425L88 0v41.76H39.638V6.425zm0 39.132H88V88L39.638 81.65V45.557z" />
+                    </svg>
+                    Sign in with Betopia SSO
+                  </>
+                )}
+              </button>
+
+              {/* Or Login with Email */}
+              <button
+                onClick={() => { setShowEmailForm(true); setError(''); }}
+                className="mt-4 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+              >
+                Or sign in with email
               </button>
 
               {/* Security Footer */}
