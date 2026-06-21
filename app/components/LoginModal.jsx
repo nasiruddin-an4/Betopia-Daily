@@ -13,6 +13,7 @@ export default function LoginModal({ isOpen, onClose }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
   const login = useUserStore((state) => state.login);
   const ssoLogin = useUserStore((state) => state.ssoLogin);
   const { instance } = useMsal();
@@ -47,6 +48,14 @@ export default function LoginModal({ isOpen, onClose }) {
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
+
+    // Honeypot check: If the hidden field is filled out, it's a bot!
+    if (honeypot) {
+      console.warn('Bot activity detected and blocked.');
+      setError('Suspicious activity detected. Please try again later.');
+      return;
+    }
+
     if (!email || !password) {
       setError('Please enter both Email and Password');
       return;
@@ -168,6 +177,20 @@ export default function LoginModal({ isOpen, onClose }) {
               <p className="text-sm text-gray-400 mb-6">Enter your credentials below</p>
 
               <form onSubmit={handleEmailLogin} className="space-y-4">
+                {/* Honeypot field - visually hidden, inaccessible to screen readers to stop bots */}
+                <div style={{ display: 'none' }} aria-hidden="true">
+                  <label htmlFor="hp_email_sec">Do not fill this out</label>
+                  <input
+                    type="text"
+                    id="hp_email_sec"
+                    name="hp_email_sec"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex="-1"
+                    autoComplete="off"
+                  />
+                </div>
+
                 {error && (
                   <div className="p-3 bg-red-50 border border-red-100 text-red-500 rounded-xl text-sm font-semibold text-center">
                     {error}
