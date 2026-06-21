@@ -71,14 +71,13 @@ export const useUserStore = create(
           const erpUser = data?.user || data?.result || data?.data || data || { email };
           const extracted_employee_id = erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null;
 
-          // Step 2: Fetch profile from external ERP API
+          // Step 2: Fetch profile from external ERP API via local Next.js proxy to avoid CORS
           let erpExternalProfile = null;
           try {
-            const erpRes = await fetch('https://erp.betopiagroup.com/grocery-api/profile/', {
+            const erpRes = await fetch('/api/erp-profile', {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': process.env.NEXT_PUBLIC_ERP_API_KEY
+                'Content-Type': 'application/json'
               },
               body: JSON.stringify({ email })
             });
@@ -242,14 +241,13 @@ export const useUserStore = create(
           const email = erpUser?.email || erpUser?.login;
           const extracted_employee_id = erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null;
 
-          // Step 2: Fetch profile from external ERP API
+          // Step 2: Fetch profile from external ERP API via local Next.js proxy to avoid CORS
           let erpExternalProfile = null;
           try {
-            const erpRes = await fetch('https://erp.betopiagroup.com/grocery-api/profile/', {
+            const erpRes = await fetch('/api/erp-profile', {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': process.env.NEXT_PUBLIC_ERP_API_KEY
+                'Content-Type': 'application/json'
               },
               body: JSON.stringify({ email })
             });
