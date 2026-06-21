@@ -71,33 +71,46 @@ export const useUserStore = create(
           const erpUser = data?.user || data?.result || data?.data || data || { email };
           const extracted_employee_id = erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null;
 
-          // Step 2: Fetch profile from the profile API to match & get user details FIRST
-          let profileData = null;
+          // Step 2: Fetch profile from external ERP API
+          let erpExternalProfile = null;
           try {
-            const headers = { 'Content-Type': 'application/json' };
-            if (access_token) {
-              headers['Authorization'] = `Bearer ${access_token}`;
-            }
-            const profileRes = await fetch(`${BASE_URL}profile/`, {
-              method: 'GET',
-              headers
+            const erpRes = await fetch('https://erp.betopiagroup.com/grocery-api/profile/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': process.env.NEXT_PUBLIC_ERP_API_KEY
+              },
+              body: JSON.stringify({ email })
             });
-            if (profileRes.ok) {
-              const profileJson = await profileRes.json();
-              // Profile API returns an array or object — find the matching user by email
-              const profiles = Array.isArray(profileJson) ? profileJson 
-                : profileJson?.data ? (Array.isArray(profileJson.data) ? profileJson.data : [profileJson.data])
-                : profileJson?.results ? profileJson.results 
-                : [profileJson];
-              
-              profileData = profiles.find(p => p.email === email) || profiles[0] || null;
+            if (erpRes.ok) {
+              const erpJson = await erpRes.json();
+              if (erpJson.success) {
+                erpExternalProfile = erpJson;
+              }
             }
-          } catch (profileErr) {
-            console.error('Profile fetch error:', profileErr);
+          } catch (err) {
+            console.error('External ERP Profile fetch error:', err);
           }
 
-          // Step 3: Post to backend to create profile if it doesn't exist
-          if (!profileData) {
+          // Step 3: Post to our backend to sync/create profile
+          if (erpExternalProfile) {
+            try {
+              const syncRes = await fetch(`${BASE_URL}profile/`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${access_token}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(erpExternalProfile)
+              });
+              if (!syncRes.ok) {
+                console.error('Profile sync failed:', await syncRes.text());
+              }
+            } catch (err) {
+              console.error('Profile sync network error:', err);
+            }
+          } else {
+            // Fallback to form data creation if external fetch fails
             try {
               const formData = new FormData();
               formData.append('email', erpUser.email || email);
@@ -112,7 +125,6 @@ export const useUserStore = create(
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${access_token}`
-                  // No Content-Type for FormData
                 },
                 body: formData
               });
@@ -120,11 +132,34 @@ export const useUserStore = create(
               if (!createRes.ok) {
                 const errText = await createRes.text();
                 console.error('Create profile failed:', createRes.status, errText);
-                alert(`Profile Creation Failed: ${createRes.status} ${errText}`);
               }
             } catch (createProfileErr) {
               console.error('Create profile network error:', createProfileErr);
             }
+          }
+
+          // Step 4: Fetch unified profile from our GET API
+          let profileData = null;
+          try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (access_token) {
+              headers['Authorization'] = `Bearer ${access_token}`;
+            }
+            const profileRes = await fetch(`${BASE_URL}profile/`, {
+              method: 'GET',
+              headers
+            });
+            if (profileRes.ok) {
+              const profileJson = await profileRes.json();
+              const profiles = Array.isArray(profileJson) ? profileJson 
+                : profileJson?.data ? (Array.isArray(profileJson.data) ? profileJson.data : [profileJson.data])
+                : profileJson?.results ? profileJson.results 
+                : [profileJson];
+              
+              profileData = profiles.find(p => p.email === email) || profiles[0] || null;
+            }
+          } catch (profileErr) {
+            console.error('Profile fetch error:', profileErr);
           }
 
           // Build the user object by merging ERP login response + profile data
@@ -207,32 +242,46 @@ export const useUserStore = create(
           const email = erpUser?.email || erpUser?.login;
           const extracted_employee_id = erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null;
 
-          // Step 2: Fetch profile from the profile API to match & get user details FIRST
-          let profileData = null;
+          // Step 2: Fetch profile from external ERP API
+          let erpExternalProfile = null;
           try {
-            const headers = { 'Content-Type': 'application/json' };
-            if (access_token) {
-              headers['Authorization'] = `Bearer ${access_token}`;
-            }
-            const profileRes = await fetch(`${BASE_URL}profile/`, {
-              method: 'GET',
-              headers
+            const erpRes = await fetch('https://erp.betopiagroup.com/grocery-api/profile/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': process.env.NEXT_PUBLIC_ERP_API_KEY
+              },
+              body: JSON.stringify({ email })
             });
-            if (profileRes.ok) {
-              const profileJson = await profileRes.json();
-              const profiles = Array.isArray(profileJson) ? profileJson 
-                : profileJson?.data ? (Array.isArray(profileJson.data) ? profileJson.data : [profileJson.data])
-                : profileJson?.results ? profileJson.results 
-                : [profileJson];
-              
-              profileData = profiles.find(p => p.email === email) || profiles[0] || null;
+            if (erpRes.ok) {
+              const erpJson = await erpRes.json();
+              if (erpJson.success) {
+                erpExternalProfile = erpJson;
+              }
             }
-          } catch (profileErr) {
-            console.error('Profile fetch error:', profileErr);
+          } catch (err) {
+            console.error('External ERP Profile fetch error:', err);
           }
 
-          // Step 3: Post to backend to create profile if it doesn't exist
-          if (!profileData) {
+          // Step 3: Post to our backend to sync/create profile
+          if (erpExternalProfile) {
+            try {
+              const syncRes = await fetch(`${BASE_URL}profile/`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${access_token}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(erpExternalProfile)
+              });
+              if (!syncRes.ok) {
+                console.error('Profile sync failed:', await syncRes.text());
+              }
+            } catch (err) {
+              console.error('Profile sync network error:', err);
+            }
+          } else {
+            // Fallback to form data creation if external fetch fails
             try {
               const formData = new FormData();
               formData.append('email', erpUser.email || email);
@@ -258,6 +307,30 @@ export const useUserStore = create(
             } catch (createProfileErr) {
               console.error('Create profile network error:', createProfileErr);
             }
+          }
+
+          // Step 4: Fetch unified profile from our GET API
+          let profileData = null;
+          try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (access_token) {
+              headers['Authorization'] = `Bearer ${access_token}`;
+            }
+            const profileRes = await fetch(`${BASE_URL}profile/`, {
+              method: 'GET',
+              headers
+            });
+            if (profileRes.ok) {
+              const profileJson = await profileRes.json();
+              const profiles = Array.isArray(profileJson) ? profileJson 
+                : profileJson?.data ? (Array.isArray(profileJson.data) ? profileJson.data : [profileJson.data])
+                : profileJson?.results ? profileJson.results 
+                : [profileJson];
+              
+              profileData = profiles.find(p => p.email === email) || profiles[0] || null;
+            }
+          } catch (profileErr) {
+            console.error('Profile fetch error:', profileErr);
           }
 
           const userType = profileData?.user_type || erpUser?.user_type || 'employee';
