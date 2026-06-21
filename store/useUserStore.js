@@ -94,13 +94,27 @@ export const useUserStore = create(
           // Step 3: Post to our backend to sync/create profile
           if (erpExternalProfile) {
             try {
+              const emp = erpExternalProfile.employee || {};
+              const usr = erpExternalProfile.user || {};
+              
+              const syncPayload = {
+                email: usr.email || email,
+                user_type: "employee",
+                company: emp.company || "",
+                employee_id: emp.employee_id ? parseInt(emp.employee_id) : (emp.employee_id_no ? parseInt(emp.employee_id_no) : 0),
+                company_address: emp.company_address || "",
+                avatar: erpExternalProfile.profile_image || (erpExternalProfile.avatar_url ? `https://erp.betopiagroup.com${erpExternalProfile.avatar_url}` : ""),
+                access_token: access_token,
+                phone: usr.phone || emp.phone || emp.mobile_phone || ""
+              };
+
               const syncRes = await fetch(`${BASE_URL}profile/`, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${access_token}`,
                   'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(erpExternalProfile)
+                body: JSON.stringify(syncPayload)
               });
               if (!syncRes.ok) {
                 console.error('Profile sync failed:', await syncRes.text());
@@ -264,13 +278,27 @@ export const useUserStore = create(
           // Step 3: Post to our backend to sync/create profile
           if (erpExternalProfile) {
             try {
+              const emp = erpExternalProfile.employee || {};
+              const usr = erpExternalProfile.user || {};
+              
+              const syncPayload = {
+                email: usr.email || email,
+                user_type: "employee",
+                company: emp.company || "",
+                employee_id: emp.employee_id ? parseInt(emp.employee_id) : (emp.employee_id_no ? parseInt(emp.employee_id_no) : 0),
+                company_address: emp.company_address || "",
+                avatar: erpExternalProfile.profile_image || (erpExternalProfile.avatar_url ? `https://erp.betopiagroup.com${erpExternalProfile.avatar_url}` : ""),
+                access_token: access_token,
+                phone: usr.phone || emp.phone || emp.mobile_phone || ""
+              };
+
               const syncRes = await fetch(`${BASE_URL}profile/`, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${access_token}`,
                   'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(erpExternalProfile)
+                body: JSON.stringify(syncPayload)
               });
               if (!syncRes.ok) {
                 console.error('Profile sync failed:', await syncRes.text());
