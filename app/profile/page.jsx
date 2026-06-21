@@ -309,23 +309,43 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats Area */}
-          <div className="flex items-center gap-8 bg-white/60 backdrop-blur-md px-8 py-5 rounded-2xl border border-white/50 shadow-sm">
+          <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 bg-white/60 backdrop-blur-md px-8 py-5 rounded-2xl border border-white/50 shadow-sm">
             <div className="text-center">
               <div className="w-10 h-10 mx-auto bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-[#FA8B24] mb-2">
                 <Package size={18} />
               </div>
               <div className="text-xl font-black text-gray-900">{orders.length}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Orders Total</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Orders</div>
             </div>
 
-            <div className="w-px h-16 bg-gray-200/60"></div>
+            <div className="hidden lg:block w-px h-16 bg-gray-200/60"></div>
+
+            <div className="text-center">
+              <div className="w-10 h-10 mx-auto bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-red-500 mb-2">
+                <Wallet size={18} />
+              </div>
+              <div className="text-xl font-bold text-gray-900">৳ {eligibility?.used_money ? eligibility.used_money.toLocaleString() : '0.00'}</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Used Money</div>
+            </div>
+
+            <div className="hidden lg:block w-px h-16 bg-gray-200/60"></div>
+
+            <div className="text-center">
+              <div className="w-10 h-10 mx-auto bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-amber-500 mb-2">
+                <Wallet size={18} />
+              </div>
+              <div className="text-xl font-bold text-gray-900">৳ {eligibility?.pending_money ? eligibility.pending_money.toLocaleString() : '0.00'}</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Pending</div>
+            </div>
+
+            <div className="hidden lg:block w-px h-16 bg-gray-200/60"></div>
 
             <div className="text-center">
               <div className="w-10 h-10 mx-auto bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-2">
                 <Wallet size={18} />
               </div>
-              <div className="text-xl font-bold text-gray-900">৳ {eligibility?.eligible_amount ? eligibility.eligible_amount.toLocaleString() : '0.00'}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Eligible Advance Amount</div>
+              <div className="text-xl font-bold text-gray-900">৳ {eligibility?.eligible_money ? eligibility.eligible_money.toLocaleString() : '0.00'}</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Eligible Amount</div>
             </div>
 
 
