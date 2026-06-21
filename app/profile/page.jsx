@@ -171,19 +171,21 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function fetchEligibility() {
-      if (!accessToken || !isAuthenticated) return;
+      if (!isAuthenticated || !user?.email) return;
       setLoadingElig(true);
       try {
-        const res = await fetch(`/api/erp/advance-salary/eligibility/`, {
-          method: 'GET',
+        const res = await fetch(`/api/erp-eligibility`, {
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
             'Accept': 'application/json',
-          }
+          },
+          body: JSON.stringify({ email: user.email })
         });
         if (res.ok) {
           const data = await res.json();
-          setEligibility(data.eligibility || data);
+          // ERP might wrap the response in .data or .eligibility, we handle both just in case
+          setEligibility(data.eligibility || data.data || data);
         }
       } catch (err) {
         console.error(err);
@@ -194,7 +196,7 @@ export default function ProfilePage() {
     if (activeTab === 'overview' || activeTab === 'information') {
       fetchEligibility();
     }
-  }, [activeTab, accessToken, isAuthenticated]);
+  }, [activeTab, isAuthenticated, user]);
 
   useEffect(() => {
     setMounted(true);
@@ -314,16 +316,6 @@ export default function ProfilePage() {
               </div>
               <div className="text-xl font-black text-gray-900">{orders.length}</div>
               <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Orders Total</div>
-            </div>
-
-            <div className="w-px h-16 bg-gray-200/60"></div>
-
-            <div className="text-center">
-              <div className="w-10 h-10 mx-auto bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-purple-500 mb-2">
-                <Heart size={18} />
-              </div>
-              <div className="text-xl font-black text-gray-900">12</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Wishlist Items</div>
             </div>
 
             <div className="w-px h-16 bg-gray-200/60"></div>
@@ -463,8 +455,8 @@ export default function ProfilePage() {
 
                     <div className="flex flex-col gap-4">
                       {orders.slice(0, 3).map((order) => (
-                        <div 
-                          key={order.order_id} 
+                        <div
+                          key={order.order_id}
                           onClick={() => {
                             setActiveTab('orders');
                             setExpandedOrders(new Set([order.order_id])); // Auto-expand this specific order
@@ -478,10 +470,9 @@ export default function ProfilePage() {
                               <img src={getImageUrl(order.items[0]?.product_image || order.items[0]?.product?.image_url)} alt="Product" className="w-full h-full object-contain" />
                             </div>
                             <div>
-                              <span className={`inline-flex px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border mb-2 ${
-                                order.status.toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700 border-green-200' :
+                              <span className={`inline-flex px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border mb-2 ${order.status.toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700 border-green-200' :
                                 order.status.toLowerCase() === 'rejected' || order.status.toLowerCase() === 'cancelled' ? 'bg-red-100 text-red-700 border-red-200' :
-                                'bg-orange-100 text-orange-700 border-orange-200'
+                                  'bg-orange-100 text-orange-700 border-orange-200'
                                 }`}>
                                 {order.status}
                               </span>
@@ -598,10 +589,10 @@ export default function ProfilePage() {
                               </td>
                               <td className="py-6 text-center">
                                 <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${order.status.toLowerCase() === 'delivered'
-                                    ? 'bg-green-50 text-green-600 border-green-100'
-                                    : order.status.toLowerCase() === 'rejected' || order.status.toLowerCase() === 'cancelled'
-                                      ? 'bg-red-50 text-red-600 border-red-100'
-                                      : 'bg-amber-50 text-amber-600 border-amber-100'
+                                  ? 'bg-green-50 text-green-600 border-green-100'
+                                  : order.status.toLowerCase() === 'rejected' || order.status.toLowerCase() === 'cancelled'
+                                    ? 'bg-red-50 text-red-600 border-red-100'
+                                    : 'bg-amber-50 text-amber-600 border-amber-100'
                                   }`}>
                                   {order.status}
                                 </span>
