@@ -195,15 +195,15 @@ export const useUserStore = create(
           } catch(e) {
              data = {};
           }
-          
-          const access_token = data?.accessToken || data?.access_token || data?.token || null;
-          const refresh_token = data?.refreshToken || data?.refresh_token || null;
+          const responseData = data?.data || data;
+          const access_token = responseData?.accessToken || responseData?.access_token || responseData?.token || null;
+          const refresh_token = responseData?.refreshToken || responseData?.refresh_token || null;
 
           if (!access_token) {
             return { success: false, error: 'SSO Login failed: No access token received from server.' };
           }
 
-          const erpUser = data?.user || data?.result || data?.data || data;
+          const erpUser = responseData?.user || responseData?.result || responseData;
           const email = erpUser?.email || erpUser?.login;
           const extracted_employee_id = erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null;
 
