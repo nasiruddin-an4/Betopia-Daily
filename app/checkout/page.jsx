@@ -58,26 +58,27 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     async function fetchEligibility() {
-      if (!accessToken || !isAuthenticated) return;
+      if (!isAuthenticated || !user?.email) return;
       try {
-        const res = await fetch(`/api/erp/advance-salary/eligibility/`, {
-          method: 'GET',
+        const res = await fetch(`/api/erp-eligibility`, {
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
             'Accept': 'application/json',
-          }
+          },
+          body: JSON.stringify({ email: user.email })
         });
         if (res.ok) {
           const data = await res.json();
-          const elig = data.eligibility || data;
-          setEligibilityBalance(elig?.eligible_amount || 0);
+          const elig = data.eligibility || data.data || data;
+          setEligibilityBalance(elig?.eligible_money || 0);
         }
       } catch (err) {
         console.error(err);
       }
     }
     fetchEligibility();
-  }, [accessToken, isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const balanceToUse = eligibilityBalance > 0 ? eligibilityBalance : Number(user?.salary_credit_balance || 0);
   const hasEnoughBalance = balanceToUse >= total;
