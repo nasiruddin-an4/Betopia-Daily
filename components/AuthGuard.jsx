@@ -15,7 +15,7 @@ export default function AuthGuard({ children }) {
   }, []);
 
   useEffect(() => {
-    const publicRoutes = ['/', '/login', '/shop', '/cart'];
+    const publicRoutes = ['/', '/login', '/shop', '/cart', '/hot-deals'];
     const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/product/');
 
     if (mounted && !isAuthenticated && !isPublicRoute) {
@@ -32,7 +32,7 @@ export default function AuthGuard({ children }) {
   }
 
   // Allow rendering public pages if not authenticated, or any page if authenticated
-  const publicRoutes = ['/', '/login', '/shop', '/cart'];
+  const publicRoutes = ['/', '/login', '/shop', '/cart', '/hot-deals'];
   const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/product/');
 
   if (!isAuthenticated && !isPublicRoute) {

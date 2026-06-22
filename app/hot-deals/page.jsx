@@ -6,12 +6,16 @@ import { ShoppingBag, Flame } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useCartStore } from '../../store/useCartStore';
 import { useSidebarStore } from '../../store/useSidebarStore';
+import { useUserStore } from '../../store/useUserStore';
+import { useRouter } from 'next/navigation';
 
 export default function HotDealsPage() {
   const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useSidebarStore((state) => state.openCart);
+  const { isAuthenticated } = useUserStore();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchDeals() {
@@ -112,7 +116,12 @@ export default function HotDealsPage() {
 
                   <div className="mt-auto">
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (!isAuthenticated) {
+                          router.push('/login?redirect=/hot-deals');
+                          return;
+                        }
                         addItem({
                           ...product,
                           product_id: product.id || product.slug,

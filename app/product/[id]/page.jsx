@@ -26,25 +26,25 @@ export default function ProductDetailsPage() {
         let fetchedProduct = null;
         if (res?.success) fetchedProduct = res.data;
         else if (res && res.name) fetchedProduct = res;
-        
+
         setProduct(fetchedProduct);
 
         if (fetchedProduct) {
-           const categorySlug = typeof fetchedProduct.category === 'object' ? fetchedProduct.category?.slug : fetchedProduct.category;
-           if (categorySlug) {
-             const relRes = await api.getProducts({ category: categorySlug });
-             let relList = [];
-             if (relRes?.success) relList = relRes.data;
-             else if (Array.isArray(relRes)) relList = relRes;
+          const categorySlug = typeof fetchedProduct.category === 'object' ? fetchedProduct.category?.slug : fetchedProduct.category;
+          if (categorySlug) {
+            const relRes = await api.getProducts({ category: categorySlug });
+            let relList = [];
+            if (relRes?.success) relList = relRes.data;
+            else if (Array.isArray(relRes)) relList = relRes;
 
-             setRelatedProducts(relList.filter(p => p.slug !== id && p.id !== id).slice(0, 4));
-           } else {
-             const relRes = await api.getProducts();
-             let relList = [];
-             if (relRes?.success) relList = relRes.data;
-             else if (Array.isArray(relRes)) relList = relRes;
-             setRelatedProducts(relList.filter(p => p.slug !== id && p.id !== id).slice(0, 4));
-           }
+            setRelatedProducts(relList.filter(p => p.slug !== id && p.id !== id).slice(0, 4));
+          } else {
+            const relRes = await api.getProducts();
+            let relList = [];
+            if (relRes?.success) relList = relRes.data;
+            else if (Array.isArray(relRes)) relList = relRes;
+            setRelatedProducts(relList.filter(p => p.slug !== id && p.id !== id).slice(0, 4));
+          }
         }
       } catch (err) {
         console.error(err);
@@ -73,7 +73,7 @@ export default function ProductDetailsPage() {
     if (!product) return 0;
     return parseFloat(product.price) || 0;
   }, [product]);
-  
+
   const discountAmount = useMemo(() => {
     if (!product) return 0;
     return parseFloat(product.discount_amount) || 0;
@@ -91,7 +91,7 @@ export default function ProductDetailsPage() {
       const distance = endDate - now;
 
       if (distance < 0) {
-        setTimeLeft('00:00:00:00 Left');
+        setTimeLeft('');
         return;
       }
 
@@ -117,7 +117,7 @@ export default function ProductDetailsPage() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-         <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#0D9488]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#0D9488]"></div>
       </div>
     );
   }
@@ -126,7 +126,7 @@ export default function ProductDetailsPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h2>
-        <button 
+        <button
           onClick={() => router.push('/shop')}
           className="bg-[#0D9488] text-white px-6 py-2 rounded-xl font-bold hover:bg-teal-700 transition-colors"
         >
@@ -165,15 +165,15 @@ export default function ProductDetailsPage() {
         {/* Left: Product Image */}
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden bg-white border border-gray-100 group flex items-center justify-center p-8">
-            <img 
-              src={product.first_image || (product.images?.[0]?.image) || '/placeholder.png'} 
+            <img
+              src={product.first_image || (product.images?.[0]?.image) || '/placeholder.png'}
               alt={product.name}
               className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
               onError={(e) => { e.target.src = 'https://placehold.co/600x600?text=No+Image'; }}
             />
             {discountAmount > 0 && (
-              <div 
-                className="absolute top-0 left-6 bg-[#E50000] text-white font-bold px-2 pt-2 pb-3 flex flex-col items-center justify-center z-10 w-[42px]" 
+              <div
+                className="absolute top-0 left-6 bg-[#E50000] text-white font-bold px-2 pt-2 pb-3 flex flex-col items-center justify-center z-10 w-[42px]"
                 style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 83% 90%, 66% 100%, 50% 90%, 33% 100%, 16% 90%, 0 100%)" }}
               >
                 <span className="text-[10px] leading-tight font-extrabold">৳{discountAmount}</span>
@@ -184,9 +184,9 @@ export default function ProductDetailsPage() {
               <Search size={22} strokeWidth={1.5} />
             </button>
           </div>
-          
+
           {/* Thumbnails */}
-          {(product.images && product.images.length > 0) && (
+          {(product.images && product.images.length > 1) && (
             <div className="flex items-center gap-3 overflow-x-auto py-1">
               {product.images.map((img, idx) => (
                 <button key={img.id || idx} className={`w-20 h-20 border rounded-sm p-2 flex-shrink-0 bg-white ${img.is_primary || idx === 0 ? 'border-gray-300' : 'border-gray-100'}`}>
@@ -203,16 +203,16 @@ export default function ProductDetailsPage() {
             <h1 className="text-2xl font-bold text-gray-900 mb-6 leading-tight">
               {product.name}
             </h1>
-            
+
             {product.is_hot_deal && product.hot_deal_end && timeLeft && (
               <div className="flex flex-wrap items-center gap-3 mb-6">
-                 <span className="font-bold text-gray-900">Hurry Up! Sales Ends In</span>
-                 <div className="bg-[#FFD700] px-4 py-1.5 font-bold text-gray-900 text-sm rounded-sm tabular-nums tracking-wide">
-                   {timeLeft}
-                 </div>
+                <span className="font-bold text-gray-900">Hurry Up! Sales Ends In</span>
+                <div className="bg-[#FFD700] px-4 py-1.5 font-bold text-gray-900 text-sm rounded-sm tabular-nums tracking-wide">
+                  {timeLeft}
+                </div>
               </div>
             )}
-            
+
             <div className="flex items-end gap-2 mb-8">
               {discountAmount > 0 && (
                 <span className="text-gray-400 text-lg line-through font-medium">৳{oldPrice}</span>
@@ -226,7 +226,7 @@ export default function ProductDetailsPage() {
           <div className="mb-10">
             <button
               onClick={handleAddToCart}
-              className="bg-[#E50000] hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-full transition-all active:scale-[0.98] flex items-center justify-center gap-2 max-w-[200px]"
+              className="bg-brand-bright-orange hover:bg-brand-coral text-white font-bold px-6 py-2.5 rounded-full transition-all active:scale-[0.98] flex items-center justify-center gap-2 max-w-[200px]"
             >
               <Plus size={18} strokeWidth={2.5} />
               Add to Bag
@@ -238,17 +238,17 @@ export default function ProductDetailsPage() {
             <div className="space-y-4">
               <h4 className="font-bold text-gray-900 text-[15px]">Product Tags :</h4>
               <div className="flex flex-wrap gap-2">
-                 {product.tags.map((tag) => (
-                   <span key={tag.id} className="px-3 py-1 bg-[#F0F8FF] text-[#00A1E0] text-[13px] font-medium rounded-sm">
-                     {tag.name}
-                   </span>
-                 ))}
+                {product.tags.map((tag) => (
+                  <span key={tag.id} className="px-3 py-1 bg-[#F0F8FF] text-[#00A1E0] text-[13px] font-medium rounded-sm">
+                    {tag.name}
+                  </span>
+                ))}
               </div>
             </div>
           )}
 
           {/* Delivery & Service Info */}
-          <div className="space-y-4 pt-8 mt-6 border-t border-gray-100">
+          {/* <div className="space-y-4 pt-8 mt-6 border-t border-gray-100">
             <h4 className="font-bold text-gray-900 text-sm uppercase tracking-widest">Flat shipping Rate All Over Dhaka</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <div className="flex items-center gap-3 text-gray-600">
@@ -264,15 +264,15 @@ export default function ProductDetailsPage() {
                  <span className="text-sm font-medium">Order before 2.30pm for same day dispatch</span>
                </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Product Description */}
           {product.description && (
             <div className="mt-8 pt-6 border-t border-gray-100">
               <h4 className="font-bold text-gray-900 text-[15px] mb-3">Product Description :</h4>
-              <div 
-                className="prose prose-sm text-gray-600 max-w-none"
-                dangerouslySetInnerHTML={{ __html: product.description }}
+              <div
+                className="prose prose-sm text-gray-600 max-w-none break-words"
+                dangerouslySetInnerHTML={{ __html: product.description.replace(/&nbsp;/g, ' ') }}
               />
             </div>
           )}
@@ -289,7 +289,7 @@ export default function ProductDetailsPage() {
             </div>
             <Link href="/shop" className="text-[#0D9488] font-bold hover:underline text-sm">View all</Link>
           </div>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {relatedProducts.map((p) => {
               const pPrice = parseFloat(p.price) || 0;
@@ -298,15 +298,15 @@ export default function ProductDetailsPage() {
               return (
                 <div key={p.id || p.slug || Math.random()} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow relative flex flex-col h-full group">
                   <Link href={`/product/${p.slug || p.id}`} className="relative aspect-[4/3] p-4 flex items-center justify-center block">
-                    <img 
-                      src={p.first_image || (p.images && p.images.length > 0 ? p.images[0].image : '/placeholder.png')} 
+                    <img
+                      src={p.first_image || (p.images && p.images.length > 0 ? p.images[0].image : '/placeholder.png')}
                       alt={p.name}
                       className="object-contain w-full h-full transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => { e.target.src = 'https://placehold.co/400x300?text=No+Image'; }}
                     />
                     {pDiscount > 0 && (
-                      <div 
-                        className="absolute top-0 left-4 bg-[#E50000] text-white font-bold px-1.5 pt-1.5 pb-2 flex flex-col items-center justify-center z-10 w-[36px]" 
+                      <div
+                        className="absolute top-0 left-4 bg-[#E50000] text-white font-bold px-1.5 pt-1.5 pb-2 flex flex-col items-center justify-center z-10 w-[36px]"
                         style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 83% 90%, 66% 100%, 50% 90%, 33% 100%, 16% 90%, 0 100%)" }}
                       >
                         <span className="text-[10px] leading-tight font-extrabold">৳{pDiscount}</span>
@@ -321,7 +321,7 @@ export default function ProductDetailsPage() {
                         {p.name}
                       </h3>
                     </Link>
-                    
+
                     <div className="flex items-baseline gap-2 mb-4 mt-2">
                       {pDiscount > 0 && (
                         <span className="text-gray-400 text-sm line-through font-medium">৳{pPrice}</span>
@@ -329,9 +329,9 @@ export default function ProductDetailsPage() {
                       <span className="text-red-600 font-bold text-xl">৳{p.discounted_price || pPrice}</span>
                       <span className="text-xs text-gray-500">{p.unit || '1 unit'}</span>
                     </div>
-                    
+
                     <div className="mt-auto">
-                      <button 
+                      <button
                         onClick={() => {
                           addItem({
                             ...p,

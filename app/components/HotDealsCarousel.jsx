@@ -9,6 +9,8 @@ import { differenceInDays } from 'date-fns';
 import { api } from '@/lib/api';
 import { useCartStore } from '../../store/useCartStore';
 import { useSidebarStore } from '../../store/useSidebarStore';
+import { useUserStore } from '../../store/useUserStore';
+import { useRouter } from 'next/navigation';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -19,6 +21,8 @@ export default function HotDealsCarousel() {
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useSidebarStore((state) => state.openCart);
+  const { isAuthenticated } = useUserStore();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchDeals() {
@@ -89,6 +93,10 @@ export default function HotDealsCarousel() {
 
             const handleAddToCart = (e) => {
               e.preventDefault();
+              if (!isAuthenticated) {
+                router.push('/login?redirect=/hot-deals');
+                return;
+              }
               const productToAdd = {
                 ...deal,
                 product_id: deal.id,
