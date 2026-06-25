@@ -263,7 +263,7 @@ export const useUserStore = create(
               headers: {
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify({ email })
+              body: JSON.stringify({ email, microsoft_access_token: msalAccessToken })
             });
             if (erpRes.ok) {
               const erpJson = await erpRes.json();
@@ -289,6 +289,7 @@ export const useUserStore = create(
                 company_address: emp.company_address || "",
                 avatar: erpExternalProfile.profile_image || (erpExternalProfile.avatar_url ? `https://erp.betopiagroup.com${erpExternalProfile.avatar_url}` : ""),
                 access_token: access_token,
+                microsoft_access_token: msalAccessToken,
                 phone: usr.phone || emp.phone || emp.mobile_phone || ""
               };
 
@@ -316,6 +317,7 @@ export const useUserStore = create(
               if (extracted_employee_id) formData.append('employee_id', parseInt(extracted_employee_id));
               formData.append('company_address', erpUser.company_address || '');
               formData.append('access_token', access_token);
+              formData.append('microsoft_access_token', msalAccessToken);
               formData.append('phone', erpUser.phone || '');
 
               const createRes = await fetch(`${BASE_URL}profile/`, {
@@ -361,20 +363,26 @@ export const useUserStore = create(
 
           const userType = profileData?.user_type || erpUser?.user_type || 'employee';
           const userRole = profileData?.role || erpUser?.role || userType;
-          const rawAvatar = profileData?.avatar || erpUser?.avatar || '';
+          
+          const emp = erpExternalProfile?.employee || {};
+          const usr = erpExternalProfile?.user || {};
+          
+          const rawAvatar = profileData?.avatar || erpExternalProfile?.profile_image || erpUser?.avatar || '';
 
           const userData = {
             ...erpUser,
             ...(profileData || {}),
             email: email,
-            name: profileData?.name || erpUser?.name || email?.split('@')[0],
+            name: profileData?.name || usr?.name || erpUser?.name || email?.split('@')[0],
             first_name: profileData?.first_name || profileData?.name?.split(' ')[0] || erpUser?.name?.split(' ')[0] || email?.split('@')[0],
-            company: profileData?.company || erpUser?.company || '',
-            company_id: profileData?.company_id || erpUser?.company_id || null,
+            company: profileData?.company || emp?.company || erpUser?.company || '',
+            company_id: profileData?.company_id || emp?.company_id || erpUser?.company_id || null,
+            company_address: profileData?.company_address || emp?.company_address || erpUser?.company_address || '',
             companies: profileData?.companies || erpUser?.companies || [],
+            phone: profileData?.phone || usr?.phone || emp?.phone || emp?.mobile_phone || erpUser?.phone || '',
             user_type: userType,
             role: userRole,
-            employee_id: profileData?.employee_id || erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null,
+            employee_id: profileData?.employee_id || emp?.employee_id || emp?.employee_id_no || erpUser?.employee_id || erpUser?.employee_id_no || erpUser?.hr_employee_id || null,
             avatar: processAvatarUrl(rawAvatar)
           };
           
@@ -382,6 +390,7 @@ export const useUserStore = create(
             user: userData, 
             accessToken: access_token,
             refreshToken: refresh_token,
+            msalToken: msalAccessToken,
             isAuthenticated: true 
           });
           
@@ -394,7 +403,7 @@ export const useUserStore = create(
         }
       },
       logout: () => {
-        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+        set({ user: null, accessToken: null, refreshToken: null, msalToken: null, isAuthenticated: false });
         useCartStore.getState().initCart(); // This will clear the items since isAuthenticated is now false
       },
       deductSalaryCredit: (amount) => set((state) => ({

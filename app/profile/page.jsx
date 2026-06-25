@@ -43,7 +43,7 @@ const getImageUrl = (url) => {
 };
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, accessToken, updateUser } = useUserStore();
+  const { user, isAuthenticated, accessToken, msalToken, updateUser } = useUserStore();
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -180,7 +180,7 @@ export default function ProfilePage() {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          body: JSON.stringify({ email: user.email })
+          body: JSON.stringify({ email: user.email, microsoft_access_token: msalToken })
         });
         if (res.ok) {
           const data = await res.json();
@@ -196,7 +196,7 @@ export default function ProfilePage() {
     if (activeTab === 'overview' || activeTab === 'information') {
       fetchEligibility();
     }
-  }, [activeTab, isAuthenticated, user]);
+  }, [activeTab, isAuthenticated, user, msalToken]);
 
   useEffect(() => {
     setMounted(true);
