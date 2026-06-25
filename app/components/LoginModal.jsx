@@ -23,6 +23,7 @@ export default function LoginModal({ isOpen, onClose }) {
       setIsLoading(true);
       setError('');
       
+      // PRODUCTION BEHAVIOR:
       // This will navigate the current tab to Microsoft's login page
       await instance.loginRedirect(loginRequest);
       

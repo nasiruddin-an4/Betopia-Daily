@@ -12,7 +12,7 @@ import { useSidebarStore } from '../../store/useSidebarStore';
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getCartTotal, clearCart } = useCartStore();
-  const { user, deductSalaryCredit, isAuthenticated, accessToken } = useUserStore();
+  const { user, deductSalaryCredit, isAuthenticated, accessToken, msalToken } = useUserStore();
   const placeOrder = useOrderStore((state) => state.placeOrder);
 
   const [paymentMethod, setPaymentMethod] = useState('salary'); // 'salary' or 'bkash'
@@ -66,7 +66,7 @@ export default function CheckoutPage() {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          body: JSON.stringify({ email: user.email })
+          body: JSON.stringify({ email: user.email, microsoft_access_token: msalToken })
         });
         if (res.ok) {
           const data = await res.json();
@@ -78,7 +78,7 @@ export default function CheckoutPage() {
       }
     }
     fetchEligibility();
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, msalToken]);
 
   const balanceToUse = eligibilityBalance > 0 ? eligibilityBalance : Number(user?.salary_credit_balance || 0);
   const hasEnoughBalance = balanceToUse >= total;
