@@ -12,32 +12,23 @@ const PRODUCT_LIMIT = 20;
 
 export default function AllProducts() {
   const [products, setProducts] = useState([]);
-  const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useSidebarStore((state) => state.openCart);
 
   // Filters
-  const [selectedBrand, setSelectedBrand] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('');
 
   const [openDropdown, setOpenDropdown] = useState(null);
 
-  // Fetch reference data (brands & categories)
+  // Fetch categories for the filter
   useEffect(() => {
     async function fetchFilters() {
       try {
-        const [bRes, cRes] = await Promise.all([
-          api.getBrands(),
-          api.getCategories()
-        ]);
-        if (bRes?.success) setBrands(bRes.data || []);
-        else if (Array.isArray(bRes)) setBrands(bRes);
-
-        if (cRes?.success) setCategories(cRes.data || []);
-        else if (Array.isArray(cRes)) setCategories(cRes);
+        const cRes = await api.getCategories();
+        if (cRes?.success) setCategories((cRes.data || []).filter(c => c.product_count > 0));
       } catch (err) {
         console.error("Failed to fetch filters:", err);
       }
@@ -51,18 +42,11 @@ export default function AllProducts() {
       setLoading(true);
       try {
         const params = { page_size: PRODUCT_LIMIT };
-        if (selectedBrand) params.brand = selectedBrand;
         if (selectedCategory) params.category = selectedCategory;
         if (sortBy) params.sort = sortBy;
 
         const res = await api.getProducts(params);
-        if (res?.success) {
-          setProducts(res.data || []);
-        } else if (Array.isArray(res)) {
-          setProducts(res);
-        } else {
-          setProducts([]);
-        }
+        setProducts(res?.success ? res.data || [] : []);
       } catch (error) {
         console.error("Failed to fetch products:", error);
         setProducts([]);
@@ -71,11 +55,10 @@ export default function AllProducts() {
       }
     }
     fetchProducts();
-  }, [selectedBrand, selectedCategory, sortBy]);
+  }, [selectedCategory, sortBy]);
 
   const displayedProducts = products.slice(0, PRODUCT_LIMIT);
   const seeAllQuery = new URLSearchParams({
-    ...(selectedBrand && { brand: selectedBrand }),
     ...(selectedCategory && { category: selectedCategory }),
   }).toString();
 
@@ -95,36 +78,6 @@ export default function AllProducts() {
               onClick={() => setOpenDropdown(null)}
             />
           )}
-
-          {/* Brand Dropdown */}
-          <div className="relative z-50">
-            <button
-              onClick={() => setOpenDropdown(openDropdown === 'brand' ? null : 'brand')}
-              className="bg-white border border-gray-200 text-sm font-medium rounded-lg px-4 py-2.5 text-gray-700 outline-none hover:border-gray-300 focus:ring-2 focus:ring-[#0D9488] flex items-center justify-between min-w-[140px] transition-all"
-            >
-              <span className="truncate">{selectedBrand ? brands.find(b => b.slug === selectedBrand)?.name || 'All Brands' : 'All Brands'}</span>
-              <ChevronDown size={16} className={`ml-2 text-gray-500 transition-transform ${openDropdown === 'brand' ? 'rotate-180' : ''}`} />
-            </button>
-            {openDropdown === 'brand' && (
-              <div className="absolute top-full mt-2 w-full min-w-[180px] right-0 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50">
-                <div
-                  className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${!selectedBrand ? 'bg-teal-50 text-teal-700 font-bold' : 'text-gray-700 font-medium'}`}
-                  onClick={() => { setSelectedBrand(''); setOpenDropdown(null); }}
-                >
-                  All Brands
-                </div>
-                {brands.map(b => (
-                  <div
-                    key={b.slug}
-                    className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${selectedBrand === b.slug ? 'bg-teal-50 text-teal-700 font-bold' : 'text-gray-700 font-medium'}`}
-                    onClick={() => { setSelectedBrand(b.slug); setOpenDropdown(null); }}
-                  >
-                    {b.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* Category Dropdown */}
           <div className="relative z-50">
@@ -165,8 +118,7 @@ export default function AllProducts() {
               <span className="truncate">
                 {sortBy === 'price_low' ? 'Price: Low to High' :
                   sortBy === 'price_high' ? 'Price: High to Low' :
-                    sortBy === 'best_sell' ? 'Best Selling' :
-                      sortBy === 'top_review' ? 'Top Reviewed' : 'Sort By'}
+                    sortBy === 'newest' ? 'Newest' : 'Sort By'}
               </span>
               <ChevronDown size={16} className={`ml-2 text-gray-500 transition-transform ${openDropdown === 'sort' ? 'rotate-180' : ''}`} />
             </button>
@@ -191,16 +143,10 @@ export default function AllProducts() {
                   Price: High to Low
                 </div>
                 <div
-                  className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${sortBy === 'best_sell' ? 'bg-teal-50 text-teal-700 font-bold' : 'text-gray-700 font-medium'}`}
-                  onClick={() => { setSortBy('best_sell'); setOpenDropdown(null); }}
+                  className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${sortBy === 'newest' ? 'bg-teal-50 text-teal-700 font-bold' : 'text-gray-700 font-medium'}`}
+                  onClick={() => { setSortBy('newest'); setOpenDropdown(null); }}
                 >
-                  Best Selling
-                </div>
-                <div
-                  className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${sortBy === 'top_review' ? 'bg-teal-50 text-teal-700 font-bold' : 'text-gray-700 font-medium'}`}
-                  onClick={() => { setSortBy('top_review'); setOpenDropdown(null); }}
-                >
-                  Top Reviewed
+                  Newest
                 </div>
               </div>
             )}

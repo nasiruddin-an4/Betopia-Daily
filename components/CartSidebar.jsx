@@ -12,7 +12,7 @@ import { useUserStore } from "../store/useUserStore";
 import { useRouter } from "next/navigation";
 
 export default function CartSidebar({ isOpen, onClose }) {
-  const { items, updateQuantity, removeItem, getCartTotal, grand_total, subtotal, total_discount } = useCartStore();
+  const { items, updateQuantity, removeItem, getCartTotal } = useCartStore();
   const { isAuthenticated } = useUserStore();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
@@ -21,7 +21,7 @@ export default function CartSidebar({ isOpen, onClose }) {
     setMounted(true);
   }, []);
 
-  const total = Number(grand_total) || getCartTotal();
+  const total = getCartTotal();
 
   const handleCheckout = () => {
     onClose();
@@ -101,7 +101,7 @@ export default function CartSidebar({ isOpen, onClose }) {
                         </div>
                       </div>
                       <div className="text-[13px] font-bold text-gray-900 shrink-0 whitespace-nowrap">
-                        ৳ {item.quantity_wise_price || (item.price * item.quantity).toFixed(2)}
+                        ৳ {(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
 

@@ -12,8 +12,16 @@ import { useSidebarStore } from '../../store/useSidebarStore';
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getCartTotal, clearCart } = useCartStore();
-  const { user, isAuthenticated, accessToken } = useUserStore();
+  const { user, isAuthenticated } = useUserStore();
   const placeOrder = useOrderStore((state) => state.placeOrder);
+  const validateCart = useOrderStore((state) => state.validateCart);
+
+  // One key per checkout: if the request is retried, the CRM won't create a second order
+  const [idempotencyKey] = useState(() =>
+    `bd-${typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`}`
+  );
+  const [totals, setTotals] = useState(null); // { subtotal, tax, total } from the CRM
+  const [cartError, setCartError] = useState('');
 
   const [mounted, setMounted] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
@@ -49,8 +57,21 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  const subtotal = Number(useCartStore.getState().grand_total) || getCartTotal();
-  const total = subtotal; // No shipping fee
+  // Live prices, tax and stock check from the CRM whenever the cart changes
+  useEffect(() => {
+    if (!isAuthenticated || items.length === 0 || orderSuccess) return;
+    let cancelled = false;
+    validateCart(items, user?.phone).then(({ totals: t, error }) => {
+      if (cancelled) return;
+      setTotals(t || null);
+      setCartError(error || '');
+    });
+    return () => { cancelled = true; };
+  }, [items, isAuthenticated, orderSuccess, validateCart, user?.phone]);
+
+  const subtotal = totals?.subtotal ?? getCartTotal();
+  const tax = totals?.tax ?? 0;
+  const total = totals?.total ?? subtotal;
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
   if (!mounted || !user) return null;
@@ -58,19 +79,21 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
+    const phone = (user.phone || formData.phone || '').trim();
+    if (!phone) {
+      alert('Please enter your contact number.');
+      return;
+    }
+
     setIsProcessing(true);
 
-    const order = await placeOrder(accessToken);
+    const { order, error } = await placeOrder({ items, phone, idempotencyKey });
 
     if (order) {
       clearCart();
-      setOrderSuccess({
-        ...order,
-        order_number: order.order_id || `BD-${Math.floor(Math.random() * 10000)}`,
-        payment_method: 'Cash on Delivery'
-      });
+      setOrderSuccess(order);
     } else {
-      alert('Failed to place order. Please try again.');
+      alert(error);
     }
     setIsProcessing(false);
   };
@@ -240,7 +263,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   <div className="text-sm font-bold text-[#1c2135]">
-                    ৳{parseFloat(item.quantity_wise_price || (item.price * item.quantity)).toFixed(2)}
+                    ৳{parseFloat(item.price * item.quantity).toFixed(2)}
                   </div>
                 </div>
               ))}
@@ -396,6 +419,12 @@ export default function CheckoutPage() {
 
             {/* Total Block */}
             <div className="bg-[#1c2135] rounded-[1.5rem] p-6 text-white shadow-xl shadow-[#1c2135]/20">
+              {tax > 0 && (
+                <div className="space-y-1.5 pb-4 mb-4 border-b border-white/10 text-sm">
+                  <div className="flex justify-between text-gray-300"><span>Subtotal</span><span>৳ {subtotal.toFixed(2)}</span></div>
+                  <div className="flex justify-between text-gray-300"><span>Tax</span><span>৳ {tax.toFixed(2)}</span></div>
+                </div>
+              )}
               <div className="flex justify-between items-end">
                 <div>
                   <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Total Amount</div>
@@ -407,11 +436,17 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {cartError && (
+              <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm font-medium text-red-600">
+                {cartError}
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isProcessing}
-              className={`w-full py-5 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all duration-300 shadow-lg ${isProcessing
+              disabled={isProcessing || !!cartError}
+              className={`w-full py-5 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all duration-300 shadow-lg ${isProcessing || cartError
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
                 : 'bg-[#735EE0] hover:bg-[#624ed6] text-white shadow-[#735EE0]/30 transform hover:-translate-y-1 active:scale-95'
                 }`}

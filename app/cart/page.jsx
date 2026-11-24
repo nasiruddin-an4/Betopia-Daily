@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { useCartStore } from '../../store/useCartStore';
 import { useUserStore } from '../../store/useUserStore';
 import { useRouter } from 'next/navigation';
-import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, ChevronDown } from 'lucide-react';
+import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, updateQuantity, removeItem, getCartTotal, grand_total } = useCartStore();
+  const { items, updateQuantity, removeItem, getCartTotal } = useCartStore();
   const { isAuthenticated } = useUserStore();
   const [mounted, setMounted] = useState(false);
 
@@ -19,7 +19,7 @@ export default function CartPage() {
 
   if (!mounted) return null;
 
-  const subtotal = Number(grand_total) || getCartTotal();
+  const subtotal = getCartTotal();
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
   if (items.length === 0) {
@@ -104,7 +104,7 @@ export default function CartPage() {
                   <div>
                     <span className="sm:hidden text-xs text-gray-400 uppercase tracking-wider font-bold mr-2">Total:</span>
                     <span className="font-bold text-[#1c2135] text-[15px]">
-                      ৳{parseFloat(item.quantity_wise_price || (item.price * item.quantity)).toFixed(2)}
+                      ৳{parseFloat(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
                   <button
@@ -136,40 +136,9 @@ export default function CartPage() {
               <span className="font-bold text-[#1c2135] text-[15px]">৳{subtotal.toFixed(2)}</span>
             </div>
 
-            <div className="mb-8">
-              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3">
-                Shipping
-              </label>
-              <div className="relative">
-                <select className="w-full appearance-none bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-lg px-4 py-3.5 focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer">
-                  <option>Standard Delivery - ৳ 5.00</option>
-                  <option>Express Delivery - ৳ 10.00</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                  <ChevronDown size={14} strokeWidth={2.5} />
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-8 pb-8 border-b border-gray-200">
-              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3">
-                Promo Code
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter your code"
-                  className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3.5 text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-400"
-                />
-              </div>
-              <button className="mt-3 bg-[#FE6A6B] hover:bg-[#ff5556] text-white text-xs font-bold uppercase tracking-wider py-3 px-6 rounded-lg transition-colors">
-                Apply
-              </button>
-            </div>
-
             <div className="flex justify-between items-end mb-8">
               <span className="text-[13px] font-bold text-[#1c2135] uppercase tracking-wide">Total Cost</span>
-              <span className="text-2xl font-extrabold text-[#1c2135] tracking-tight">৳{(subtotal + 5).toFixed(2)}</span>
+              <span className="text-2xl font-extrabold text-[#1c2135] tracking-tight">৳{subtotal.toFixed(2)}</span>
             </div>
 
             <button

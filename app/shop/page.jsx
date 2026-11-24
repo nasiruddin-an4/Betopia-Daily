@@ -20,13 +20,11 @@ function ShopContent() {
   const searchParams = useSearchParams();
 
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || '');
-  const [activeBrand, setActiveBrand] = useState(searchParams.get('brand') || '');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [sortBy, setSortBy] = useState('default');
 
   useEffect(() => {
-    setActiveBrand(searchParams.get('brand') || '');
     setActiveCategory(searchParams.get('category') || '');
     setSearchQuery(searchParams.get('search') || '');
     setSearchInput(searchParams.get('search') || '');
@@ -34,7 +32,6 @@ function ShopContent() {
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
@@ -42,25 +39,17 @@ function ShopContent() {
   const [totalCount, setTotalCount] = useState(0);
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
-  const [isBrandOpen, setIsBrandOpen] = useState(true);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useSidebarStore((state) => state.openCart);
 
-  // Fetch categories and brands
+  // Fetch categories
   useEffect(() => {
     async function fetchFilters() {
       try {
-        const [cRes, bRes] = await Promise.all([
-          api.getCategories(),
-          api.getBrands()
-        ]);
+        const cRes = await api.getCategories();
         if (cRes?.success) setCategories(cRes.data || []);
-        else if (Array.isArray(cRes)) setCategories(cRes);
-
-        if (bRes?.success) setBrands(bRes.data || []);
-        else if (Array.isArray(bRes)) setBrands(bRes);
       } catch (err) {
         console.error("Failed to fetch filters", err);
       }
@@ -78,32 +67,13 @@ function ShopContent() {
           page_size: pageSize
         };
         if (activeCategory) params.category = activeCategory;
-        if (activeBrand) params.brand = activeBrand;
         if (searchQuery) params.search = searchQuery;
         if (sortBy !== 'default') params.sort = sortBy;
 
         const res = await api.getProducts(params);
-        let list = [];
-        let count = 0;
-
-        if (res?.success) {
-          if (res.data?.results) {
-            list = res.data.results;
-            count = res.data.count || 0;
-          } else {
-            list = res.data || [];
-            count = list.length;
-          }
-        } else if (res?.results) {
-          list = res.results;
-          count = res.count || 0;
-        } else if (Array.isArray(res)) {
-          list = res;
-          count = res.length;
-        }
-
+        const list = res?.success ? res.data || [] : [];
         setProducts(list);
-        setTotalCount(count);
+        setTotalCount(res?.meta?.count ?? list.length);
       } catch (err) {
         console.error("Failed to fetch products", err);
       } finally {
@@ -111,7 +81,7 @@ function ShopContent() {
       }
     }
     fetchProducts();
-  }, [activeCategory, activeBrand, searchQuery, sortBy, page, pageSize]);
+  }, [activeCategory, searchQuery, sortBy, page, pageSize]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -123,11 +93,6 @@ function ShopContent() {
 
   const handleCategorySelect = (catSlug) => {
     setActiveCategory(catSlug);
-    setPage(1);
-  };
-
-  const handleBrandSelect = (brandSlug) => {
-    setActiveBrand(brandSlug);
     setPage(1);
   };
 
@@ -171,43 +136,6 @@ function ShopContent() {
         )}
       </div>
 
-      {/* Brands Accordion */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-        <div
-          className="flex items-center justify-between p-4 bg-white cursor-pointer select-none"
-          onClick={() => setIsBrandOpen(!isBrandOpen)}
-        >
-          <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wide">Brand</h3>
-          {isBrandOpen ? <Minus size={16} className="text-gray-900" /> : <Plus size={16} className="text-gray-900" />}
-        </div>
-
-        {isBrandOpen && (
-          <div className="px-4 pb-4 pt-1 bg-white space-y-2.5">
-            {brands.map((brand) => {
-              const count = brand.product_count !== undefined ? brand.product_count : (brand.count || 0);
-              if (count === 0) return null;
-              return (
-              <label key={brand.slug || brand.id} className="flex items-center justify-between cursor-pointer group">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={activeBrand === brand.slug}
-                    onChange={() => {
-                      handleBrandSelect(activeBrand === brand.slug ? '' : brand.slug);
-                      setIsMobileFilterOpen(false);
-                    }}
-                    className="w-4 h-4 rounded border-gray-300 text-[#0D9488] focus:ring-[#0D9488] cursor-pointer"
-                  />
-                  <span className={`text-sm ${activeBrand === brand.slug ? 'text-gray-900 font-medium' : 'text-gray-600 group-hover:text-gray-900'}`}>
-                    {brand.name}
-                  </span>
-                </div>
-                <span className="text-[11px] text-gray-400 font-medium">({count})</span>
-              </label>
-            )})}
-          </div>
-        )}
-      </div>
     </div>
   );
 
@@ -383,7 +311,7 @@ function ShopContent() {
               <h3 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">No products found</h3>
               <p className="text-gray-500 font-medium max-w-xs mx-auto">We couldn't find any products matching your current search or category.</p>
               <button
-                onClick={() => { setSearchInput(''); setSearchQuery(''); setActiveCategory(''); setActiveBrand(''); setSortBy('default'); setPage(1); }}
+                onClick={() => { setSearchInput(''); setSearchQuery(''); setActiveCategory(''); setSortBy('default'); setPage(1); }}
                 className="mt-8 font-bold text-white bg-brand-bright-orange hover:bg-brand-coral px-8 py-3 rounded-lg transition-all active:scale-95"
               >
                 Reset Selection

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUserStore } from '../../store/useUserStore';
 import { useOrderStore } from '../../store/useOrderStore';
 import {
@@ -31,17 +31,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-const getImageUrl = (url) => {
-  if (!url) return '/placeholder.png';
-  if (url.startsWith('http') || url.startsWith('data:')) return url;
-  const host = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://server.betopiadaily.shop/api/v1/').split('/api')[0];
-  return `${host}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+const getImageUrl = (url) => url || '/placeholder.png';
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, accessToken, msalToken, updateUser } = useUserStore();
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef(null);
+  const { user, isAuthenticated, msalToken, updateUser } = useUserStore();
 
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [editPhone, setEditPhone] = useState('');
@@ -54,110 +47,12 @@ export default function ProfilePage() {
     }
 
     setIsSavingPhone(true);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://server.betopiadaily.shop/api/v1/'}profile/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
-          email: user.email,
-          user_type: user.user_type || 'employee',
-          company: user.company || '',
-          employee_id: user.employee_id ? parseInt(user.employee_id) : null,
-          company_address: user.company_address || '',
-          avatar: user.avatar || '',
-          phone: editPhone,
-          access_token: accessToken
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const updatedProfile = data.data || data;
-        updateUser({ phone: updatedProfile.phone || editPhone });
-        setIsEditingPhone(false);
-      } else {
-        const errText = await res.text();
-        console.error('Phone update failed:', res.status, errText);
-        alert(`Failed to update phone number: ${errText}`);
-      }
-    } catch (error) {
-      console.error('Error updating phone:', error);
-      alert('An error occurred while saving.');
-    } finally {
-      setIsSavingPhone(false);
-    }
+    // Saved with the profile on this device and sent to the CRM with every order
+    updateUser({ phone: editPhone.trim() });
+    setIsEditingPhone(false);
+    setIsSavingPhone(false);
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const previewUrl = URL.createObjectURL(file);
-    updateUser({ avatar: previewUrl });
-    setIsUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('email', user.email);
-      formData.append('user_type', user.user_type || 'employee');
-      formData.append('company', user.company || '');
-      if (user.employee_id) formData.append('employee_id', user.employee_id);
-      formData.append('company_address', user.company_address || '');
-      formData.append('phone', user.phone || '');
-      formData.append('access_token', accessToken);
-      formData.append('avatar', file);
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://server.betopiadaily.shop/api/v1/'}profile/`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: formData
-      });
-
-      if (res.ok) {
-        // Fetch the updated profile via GET to retrieve the true remote avatar URL
-        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://server.betopiadaily.shop/api/v1/'}profile/`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Accept': 'application/json'
-          }
-        });
-
-        if (profileRes.ok) {
-          const profileJson = await profileRes.json();
-          const profiles = Array.isArray(profileJson) ? profileJson
-            : profileJson?.data ? (Array.isArray(profileJson.data) ? profileJson.data : [profileJson.data])
-              : profileJson?.results ? profileJson.results
-                : [profileJson];
-
-          const profileData = profiles.find(p => p.email === user.email) || profiles[0] || null;
-          if (profileData && profileData.avatar) {
-            updateUser({ avatar: profileData.avatar });
-          } else {
-            updateUser({ avatar: previewUrl });
-          }
-        } else {
-          updateUser({ avatar: previewUrl });
-        }
-      } else {
-        const errText = await res.text();
-        console.error('Avatar upload failed:', res.status, errText);
-        alert(`Failed to upload profile image. ${res.status}: ${errText}`);
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('An error occurred while uploading.');
-    } finally {
-      setIsUploading(false);
-    }
-  };
   const { orders, fetchOrders } = useOrderStore();
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -199,10 +94,10 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (mounted && isAuthenticated && accessToken) {
-      fetchOrders(accessToken);
+    if (mounted && isAuthenticated) {
+      fetchOrders();
     }
-  }, [mounted, isAuthenticated, accessToken, fetchOrders]);
+  }, [mounted, isAuthenticated, fetchOrders]);
 
   const [expandedOrders, setExpandedOrders] = useState(new Set());
 
@@ -250,32 +145,13 @@ export default function ProfilePage() {
           {/* User Profile Info */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
             <div className="relative group shrink-0">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                accept="image/*"
-                className="hidden"
-              />
               <div className="w-28 h-28 rounded-full border-4 border-white bg-white flex items-center justify-center text-[#FA8B24] text-4xl font-black shadow-lg overflow-hidden relative">
                 {user.avatar ? (
-                  <img src={user.avatar} alt={user.name} className={`w-full h-full object-cover ${isUploading ? 'opacity-50' : ''}`} />
+                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className={isUploading ? 'opacity-50' : ''}>{user.name[0]}</span>
-                )}
-                {isUploading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                    <div className="w-6 h-6 border-2 border-[#FA8B24] border-t-transparent rounded-full animate-spin"></div>
-                  </div>
+                  <span>{user.name?.[0]}</span>
                 )}
               </div>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-md border border-gray-100 text-gray-500 hover:text-[#FA8B24] transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                <Edit2 size={14} />
-              </button>
             </div>
 
             <div className="pt-2">

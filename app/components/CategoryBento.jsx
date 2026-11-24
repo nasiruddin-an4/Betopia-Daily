@@ -3,20 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { Computer, Laptop, Monitor, Armchair, Table, Mouse, Keyboard, Tv } from 'lucide-react';
-
-// Demo categories shown alongside real ones (skipped if a real category has the same slug)
-const DEMO_CATEGORIES = [
-  { slug: 'computer', name: 'Computer', Icon: Computer, product_count: 24 },
-  { slug: 'laptop', name: 'Laptop', Icon: Laptop, product_count: 36 },
-  { slug: 'monitor', name: 'Monitor', Icon: Monitor, product_count: 18 },
-  { slug: 'chair', name: 'Chair', Icon: Armchair, product_count: 12 },
-  { slug: 'table', name: 'Table', Icon: Table, product_count: 9 },
-  { slug: 'mouse', name: 'Mouse', Icon: Mouse, product_count: 42 },
-  { slug: 'keyboard', name: 'Keyboard', Icon: Keyboard, product_count: 30 },
-  { slug: 'tv', name: 'TV', Icon: Tv, product_count: 15 },
-].map(item => ({ ...item, isDemo: true }));
-
 export default function CategoryBento() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,12 +30,7 @@ export default function CategoryBento() {
     fetchData();
   }, []);
 
-  const realCategories = data.filter(item => item.product_count > 0);
-  const realSlugs = new Set(realCategories.map(item => item.slug?.toLowerCase()));
-  const displayData = [
-    ...realCategories,
-    ...DEMO_CATEGORIES.filter(item => !realSlugs.has(item.slug)),
-  ];
+  const displayData = data.filter(item => item.product_count > 0);
 
   return (
     <section className="py-8">
@@ -74,11 +55,7 @@ export default function CategoryBento() {
               className="flex items-center bg-white border border-gray-200 rounded-xl p-3 hover:shadow-md transition-shadow group"
             >
               <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center mr-4">
-                {item.Icon ? (
-                  <div className="w-full h-full bg-orange-50 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                    <item.Icon className="w-8 h-8 text-orange-500" strokeWidth={1.5} />
-                  </div>
-                ) : item.icon ? (
+                {item.icon ? (
                   <img
                     src={item.icon}
                     alt={item.name}
