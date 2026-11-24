@@ -1,9 +1,9 @@
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
 import AuthGuard from "../components/AuthGuard";
 import ScrollToTop from "./components/ScrollToTop";
+import Footer from "./components/Footer";
 
 import MsalProviderWrapper from "./components/MsalProviderWrapper";
 

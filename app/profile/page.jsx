@@ -10,7 +10,6 @@ import {
   Lock,
   MapPin,
   Bell,
-  CreditCard,
   Search,
   Filter,
   ChevronDown,
@@ -21,9 +20,6 @@ import {
   ExternalLink,
   Briefcase,
   Building2,
-  Wallet,
-  Heart,
-  RotateCcw,
   Home,
   CheckCircle2,
   ChevronRight,
@@ -225,8 +221,6 @@ export default function ProfilePage() {
   const sidebarMenu = [
     { id: 'overview', label: 'Overview', icon: Home },
     { id: 'orders', label: 'Order History', icon: Package },
-    { id: 'returns', label: 'Returns & Refunds', icon: RotateCcw },
-    { id: 'wishlist', label: 'Wishlist', icon: Heart },
   ];
 
   const InfoRow = ({ label, value }) => (
@@ -318,35 +312,6 @@ export default function ProfilePage() {
               <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Orders</div>
             </div>
 
-            <div className="hidden lg:block w-px h-16 bg-gray-200/60"></div>
-
-            <div className="text-center">
-              <div className="w-10 h-10 mx-auto bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-red-500 mb-2">
-                <Wallet size={18} />
-              </div>
-              <div className="text-xl font-bold text-gray-900">৳ {eligibility?.used_money ? eligibility.used_money.toLocaleString() : '0.00'}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Used Money</div>
-            </div>
-
-            <div className="hidden lg:block w-px h-16 bg-gray-200/60"></div>
-
-            <div className="text-center">
-              <div className="w-10 h-10 mx-auto bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-amber-500 mb-2">
-                <Wallet size={18} />
-              </div>
-              <div className="text-xl font-bold text-gray-900">৳ {eligibility?.pending_money ? eligibility.pending_money.toLocaleString() : '0.00'}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Pending</div>
-            </div>
-
-            <div className="hidden lg:block w-px h-16 bg-gray-200/60"></div>
-
-            <div className="text-center">
-              <div className="w-10 h-10 mx-auto bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-blue-500 mb-2">
-                <Wallet size={18} />
-              </div>
-              <div className="text-xl font-bold text-gray-900">৳ {eligibility?.eligible_money ? eligibility.eligible_money.toLocaleString() : '0.00'}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Eligible Amount</div>
-            </div>
 
 
           </div>
@@ -653,7 +618,7 @@ export default function ProfilePage() {
                                     </div>
                                     <div>
                                       <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Payment method</h4>
-                                      <p className="text-xs font-bold text-gray-800 capitalize">{order.payment_method || 'Salary Credit'}</p>
+                                      <p className="text-xs font-bold text-gray-800 capitalize">{order.payment_method || 'Cash on Delivery'}</p>
                                     </div>
 
                                     {/* Items mini-list inside expansion */}

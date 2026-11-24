@@ -5,17 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../store/useCartStore';
 import { useUserStore } from '../../store/useUserStore';
 import { useOrderStore } from '../../store/useOrderStore';
-import { ArrowLeft, CheckCircle2, Truck, Info, ShieldCheck, Mail, User, Phone, MapPin, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Truck, ShieldCheck, Mail, User, Phone, MapPin, ShoppingBag, Banknote } from 'lucide-react';
 import Link from 'next/link';
 import { useSidebarStore } from '../../store/useSidebarStore';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getCartTotal, clearCart } = useCartStore();
-  const { user, deductSalaryCredit, isAuthenticated, accessToken, msalToken } = useUserStore();
+  const { user, isAuthenticated, accessToken } = useUserStore();
   const placeOrder = useOrderStore((state) => state.placeOrder);
 
-  const [paymentMethod, setPaymentMethod] = useState('salary'); // 'salary' or 'bkash'
   const [mounted, setMounted] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -54,50 +53,12 @@ export default function CheckoutPage() {
   const total = subtotal; // No shipping fee
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
-  const [eligibilityBalance, setEligibilityBalance] = useState(0);
-
-  useEffect(() => {
-    async function fetchEligibility() {
-      if (!isAuthenticated || !user?.email) return;
-      try {
-        const res = await fetch(`/api/erp-eligibility`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({ email: user.email, microsoft_access_token: msalToken })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const elig = data.eligibility || data.data || data;
-          setEligibilityBalance(elig?.eligible_money || 0);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    fetchEligibility();
-  }, [isAuthenticated, user, msalToken]);
-
-  const balanceToUse = eligibilityBalance > 0 ? eligibilityBalance : Number(user?.salary_credit_balance || 0);
-  const hasEnoughBalance = balanceToUse >= total;
-
   if (!mounted || !user) return null;
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
-    if (paymentMethod === 'salary' && !hasEnoughBalance) {
-      alert("Insufficient Salary Credit balance for this order.");
-      return;
-    }
-
     setIsProcessing(true);
-
-    if (paymentMethod === 'salary') {
-      deductSalaryCredit(total);
-    }
 
     const order = await placeOrder(accessToken);
 
@@ -106,7 +67,7 @@ export default function CheckoutPage() {
       setOrderSuccess({
         ...order,
         order_number: order.order_id || `BD-${Math.floor(Math.random() * 10000)}`,
-        payment_method: paymentMethod === 'salary' ? 'Salary Credit' : 'bKash'
+        payment_method: 'Cash on Delivery'
       });
     } else {
       alert('Failed to place order. Please try again.');
@@ -131,7 +92,7 @@ export default function CheckoutPage() {
                   <h1 className="text-4xl lg:text-5xl font-bold text-[#1c2135] tracking-tight">Order Placed!</h1>
                 </div>
                 <p className="text-gray-500 font-medium text-lg mb-8 max-w-md leading-relaxed mx-auto lg:mx-0">
-                  Your order <span className="font-bold text-black bg-amber-50 px-2 py-1 rounded-md">{orderSuccess.order_number || orderSuccess.order_id || 'Pending'}</span> has been successfully processed using {orderSuccess.payment_method || 'Salary Credit'}.
+                  Your order <span className="font-bold text-black bg-amber-50 px-2 py-1 rounded-md">{orderSuccess.order_number || orderSuccess.order_id || 'Pending'}</span> has been successfully processed using {orderSuccess.payment_method || 'Cash on Delivery'}.
                 </p>
               </div>
 
@@ -407,49 +368,22 @@ export default function CheckoutPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-[#1c2135]">Payment Method</h2>
-                  <p className="text-sm text-gray-400 font-medium">Select how you want to pay</p>
+                  <p className="text-sm text-gray-400 font-medium">Pay in cash when your order arrives</p>
                 </div>
               </div>
 
               <div className="space-y-4 mb-8">
-                {/* Salary Credit (replaces Cash on Delivery visually) */}
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('salary')}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${paymentMethod === 'salary'
-                    ? 'border-[#FFB800] bg-[#FFB800]/5'
-                    : 'border-gray-100 hover:border-gray-200 bg-white'
-                    }`}
-                >
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === 'salary' ? 'border-[#FFB800]' : 'border-gray-300'
-                    }`}>
-                    {paymentMethod === 'salary' && <div className="w-2.5 h-2.5 rounded-full bg-[#FFB800]" />}
+                {/* Cash on Delivery (only payment method) */}
+                <div className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-[#FFB800] bg-[#FFB800]/5 text-left">
+                  <div className="w-5 h-5 rounded-full border-2 border-[#FFB800] flex items-center justify-center shrink-0">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#FFB800]" />
                   </div>
                   <div className="flex-1">
-                    <div className="font-bold text-[#1c2135] text-sm mb-0.5">Salary Credit</div>
-                    <div className="text-[11px] text-gray-400 font-medium">Pay directly from your employee credit</div>
+                    <div className="font-bold text-[#1c2135] text-sm mb-0.5">Cash on Delivery</div>
+                    <div className="text-[11px] text-gray-400 font-medium">Pay in cash when you receive your order</div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-[10px] uppercase font-bold text-gray-400">Balance</div>
-                    <div className="text-[12px] font-extrabold text-[#1c2135]">৳ {balanceToUse.toLocaleString()}</div>
-                  </div>
-                </button>
-
-                {/* bKash */}
-                <button
-                  type="button" disabled
-                  className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed text-left transition-all"
-                >
-                  <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0">
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-bold text-gray-400 text-sm mb-0.5">bKash</div>
-                    <div className="text-[11px] text-gray-400 font-medium">Mobile payment</div>
-                  </div>
-                  <div className="bg-gray-200 text-gray-500 text-[10px] font-bold px-2 py-1 rounded">
-                    COMING SOON
-                  </div>
-                </button>
+                  <Banknote size={22} className="text-[#FFB800] shrink-0" />
+                </div>
               </div>
 
               <div className="flex items-start gap-3 bg-[#F0FDF4] p-4 rounded-xl border border-green-100">
@@ -476,16 +410,14 @@ export default function CheckoutPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isProcessing || (paymentMethod === 'salary' && !hasEnoughBalance)}
-              className={`w-full py-5 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all duration-300 shadow-lg ${isProcessing || (paymentMethod === 'salary' && !hasEnoughBalance)
+              disabled={isProcessing}
+              className={`w-full py-5 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all duration-300 shadow-lg ${isProcessing
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
                 : 'bg-[#735EE0] hover:bg-[#624ed6] text-white shadow-[#735EE0]/30 transform hover:-translate-y-1 active:scale-95'
                 }`}
             >
               {isProcessing ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (paymentMethod === 'salary' && !hasEnoughBalance) ? (
-                'Insufficient Salary Credit'
               ) : (
                 <>
                   <ShieldCheck size={18} />

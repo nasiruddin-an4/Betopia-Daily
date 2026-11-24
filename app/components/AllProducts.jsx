@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { ShoppingCart, ChevronDown } from 'lucide-react';
+import { ShoppingCart, ChevronDown, ArrowRight } from 'lucide-react';
 import { useCartStore } from '../../store/useCartStore';
 import { useSidebarStore } from '../../store/useSidebarStore';
+
+// 5 rows on desktop (4 columns)
+const PRODUCT_LIMIT = 20;
 
 export default function AllProducts() {
   const [products, setProducts] = useState([]);
@@ -47,7 +50,7 @@ export default function AllProducts() {
     async function fetchProducts() {
       setLoading(true);
       try {
-        const params = {};
+        const params = { page_size: PRODUCT_LIMIT };
         if (selectedBrand) params.brand = selectedBrand;
         if (selectedCategory) params.category = selectedCategory;
         if (sortBy) params.sort = sortBy;
@@ -70,7 +73,11 @@ export default function AllProducts() {
     fetchProducts();
   }, [selectedBrand, selectedCategory, sortBy]);
 
-  const displayedProducts = products.slice(0, 8); // 2 rows of 4
+  const displayedProducts = products.slice(0, PRODUCT_LIMIT);
+  const seeAllQuery = new URLSearchParams({
+    ...(selectedBrand && { brand: selectedBrand }),
+    ...(selectedCategory && { category: selectedCategory }),
+  }).toString();
 
   return (
     <section className="py-12 border-t border-gray-100">
@@ -203,7 +210,7 @@ export default function AllProducts() {
 
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+          {Array.from({ length: PRODUCT_LIMIT }, (_, i) => (
             <div key={i} className="h-[340px] bg-gray-100 rounded-xl animate-pulse"></div>
           ))}
         </div>
@@ -300,8 +307,12 @@ export default function AllProducts() {
       )}
 
       <div className="mt-10 flex justify-center">
-        <Link href="/shop" className="bg-[#1e293b] hover:bg-gray-800 text-white text-sm font-bold py-3 px-8 rounded-lg flex items-center transition-colors">
-          View All Products
+        <Link
+          href={`/shop${seeAllQuery ? `?${seeAllQuery}` : ''}`}
+          className="group bg-slate-900 hover:bg-[#FA8B24] text-white text-sm font-bold py-3 px-10 rounded-lg flex items-center gap-2 transition-colors"
+        >
+          See All
+          <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
         </Link>
       </div>
     </section>

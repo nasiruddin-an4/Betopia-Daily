@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, User, Briefcase, Mail, Phone, MapPin, Wallet, ShieldCheck } from 'lucide-react';
+import { X, User, Briefcase, Mail, Phone, MapPin, ShieldCheck } from 'lucide-react';
 
 export default function ProfileModal({ user, isOpen, onClose }) {
   if (!isOpen) return null;
@@ -70,22 +70,6 @@ export default function ProfileModal({ user, isOpen, onClose }) {
             </div>
           </div>
 
-          {/* Balance Card */}
-          <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
-                <Wallet size={20} />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Salary Credit</p>
-                <p className="text-xl font-bold text-gray-900">৳ {user.salary_credit_balance.toLocaleString()}</p>
-              </div>
-            </div>
-            <div className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">
-              Active
-            </div>
-          </div>
-          
           <div className="flex items-center gap-2 text-[11px] font-bold text-gray-400 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
             <ShieldCheck size={14} className="text-green-500" /> Verified Betopia Employee Profile
           </div>
