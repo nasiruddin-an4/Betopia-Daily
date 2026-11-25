@@ -140,7 +140,7 @@ function ShopContent() {
   );
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
+    <div className="pb-8 space-y-6 sm:space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Sidebar Filters */}
         <div className="hidden lg:block lg:col-span-3">
@@ -212,7 +212,7 @@ function ShopContent() {
 
                   return (
                     <div key={product.id || product.slug || Math.random()} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow relative flex flex-col h-full group">
-                      <Link href={`/product/${product.slug || product.id}`} className="relative h-72 w-full p-4 flex items-center justify-center block">
+                      <Link href={`/product/${product.slug || product.id}`} className="relative h-36 sm:h-56 lg:h-72 w-full p-3 sm:p-4 flex items-center justify-center">
                         <img
                           src={product.first_image || (product.images && product.images.length > 0 ? product.images[0].image : '/placeholder.png')}
                           alt={product.name}
@@ -237,12 +237,12 @@ function ShopContent() {
                           </h3>
                         </Link>
 
-                        <div className="flex items-baseline gap-2 mb-4">
+                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mb-4">
                           {discount > 0 && (
                             <span className="text-gray-400 text-sm line-through font-medium">{'৳'}{price}</span>
                           )}
                           <span className="text-red-600 font-bold text-xl">{'৳'}{product.discounted_price || price}</span>
-                          <span className="text-xs text-gray-500">{product.unit || '1 unit'}</span>
+                          {product.unit && <span className="text-xs text-gray-500">{product.unit}</span>}
                           {/* Sold Count */}
                           <span className="text-xs text-gray-500 justify-end ml-auto">{(product.total_sold || product.sold_count) ? (
                             <span className="text-[10px] text-gray-400 font-medium">{product.total_sold || product.sold_count} sold</span>
@@ -256,7 +256,7 @@ function ShopContent() {
                                 ...product,
                                 product_id: product.id || product.slug,
                                 unit_price: parseFloat(product.discounted_price) || parseFloat(product.price) || 0,
-                                selected_unit: product.unit || '1 unit',
+                                selected_unit: product.unit || '',
                                 image_url: product.first_image || (product.images?.[0]?.image) || '/placeholder.png',
                               }, 1);
                               openCart();

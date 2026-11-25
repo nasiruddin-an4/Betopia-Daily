@@ -203,7 +203,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-6xl mx-auto sm:px-6 lg:px-8 py-2 sm:py-12">
       {/* Header */}
       <Link href="/cart" className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-[#1c2135] uppercase tracking-widest transition-colors mb-6">
         <ArrowLeft size={16} /> Back to Cart
@@ -215,23 +215,21 @@ export default function CheckoutPage() {
       </div>
 
       {/* Progress Bar */}
-      <div className="flex items-center justify-between mb-12 relative max-w-4xl">
+      <div className="flex items-center justify-between mb-8 sm:mb-12 relative max-w-4xl">
         <div className="absolute left-0 top-1/2 w-full h-[1px] bg-gray-200 -z-10" />
-
-        <div className="flex items-center gap-3 bg-white pr-4">
-          <div className="w-8 h-8 rounded-full bg-[#1c2135] text-white flex items-center justify-center text-sm font-bold shadow-sm">1</div>
-          <span className="text-sm font-extrabold text-[#1c2135]">Delivery</span>
-        </div>
-
-        <div className="flex items-center gap-3 bg-white px-4">
-          <div className="w-8 h-8 rounded-full bg-[#1c2135] text-white flex items-center justify-center text-sm font-bold shadow-sm">2</div>
-          <span className="text-sm font-extrabold text-[#1c2135]">Order Review</span>
-        </div>
-
-        <div className="flex items-center gap-3 bg-white pl-4">
-          <div className="w-8 h-8 rounded-full bg-[#735EE0] text-white flex items-center justify-center text-sm font-bold shadow-md shadow-[#735EE0]/30">3</div>
-          <span className="text-sm font-extrabold text-[#735EE0]">Payment</span>
-        </div>
+        {[
+          { n: 1, label: 'Delivery' },
+          { n: 2, label: 'Review', long: 'Order Review' },
+          { n: 3, label: 'Payment', active: true },
+        ].map((step, i) => (
+          <div key={step.n} className={`flex items-center gap-2 sm:gap-3 bg-white ${i === 0 ? 'pr-2 sm:pr-4' : i === 2 ? 'pl-2 sm:pl-4' : 'px-2 sm:px-4'}`}>
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full text-white flex items-center justify-center text-xs sm:text-sm font-bold ${step.active ? 'bg-[#735EE0] shadow-md shadow-[#735EE0]/30' : 'bg-[#1c2135] shadow-sm'}`}>{step.n}</div>
+            <span className={`text-xs sm:text-sm font-extrabold whitespace-nowrap ${step.active ? 'text-[#735EE0]' : 'text-[#1c2135]'}`}>
+              <span className="sm:hidden">{step.label}</span>
+              <span className="hidden sm:inline">{step.long || step.label}</span>
+            </span>
+          </div>
+        ))}
       </div>
 
       <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8">

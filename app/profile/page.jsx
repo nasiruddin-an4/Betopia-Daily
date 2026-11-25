@@ -126,7 +126,7 @@ export default function ProfilePage() {
         </span>
         <span className="text-xs font-bold text-gray-500">{label}</span>
       </div>
-      <span className="text-xs font-bold text-gray-900 text-right max-w-[50%]">{value}</span>
+      <span className="text-xs font-bold text-gray-900 text-right max-w-[60%] break-all">{value}</span>
     </div>
   );
 

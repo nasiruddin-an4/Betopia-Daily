@@ -33,28 +33,28 @@ export default function CategoryBento() {
   const displayData = data.filter(item => item.product_count > 0);
 
   return (
-    <section className="py-8">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+    <section className="py-6 sm:py-8">
+      <div className="flex items-center justify-between mb-5 sm:mb-8 gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
           Shop by Category
         </h2>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-pulse">
           {[...Array(8)].map((_, index) => (
             <div key={`skeleton-${index}`} className="h-24 bg-gray-200 rounded-xl"></div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {displayData.map((item, index) => (
             <Link
               key={item.id || index}
               href={`/shop?category=${item.slug}`}
-              className="flex items-center bg-white border border-gray-200 rounded-xl p-3 hover:shadow-md transition-shadow group"
+              className="flex flex-col sm:flex-row items-center text-center sm:text-left bg-white border border-gray-200 rounded-xl p-3 hover:shadow-md transition-shadow group"
             >
-              <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center mr-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 flex items-center justify-center mb-2 sm:mb-0 sm:mr-4">
                 {item.icon ? (
                   <img
                     src={item.icon}
@@ -70,8 +70,8 @@ export default function CategoryBento() {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col items-start justify-center flex-1">
-                <span className="text-gray-900 font-medium text-lg line-clamp-1">{item.name}</span>
+              <div className="flex flex-col items-center sm:items-start justify-center flex-1 min-w-0 w-full">
+                <span className="text-gray-900 font-medium text-sm sm:text-lg line-clamp-1">{item.name}</span>
                 <span className="text-gray-500 text-xs mt-0.5">
                   {item.product_count || 0} Product{item.product_count > 1 ? 's' : ''}
                 </span>

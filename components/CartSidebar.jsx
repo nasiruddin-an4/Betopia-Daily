@@ -46,7 +46,7 @@ export default function CartSidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-[400px] bg-white shadow-2xl z-[101] transform transition-transform duration-500 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-full max-w-[400px] bg-white z-[101] transform transition-transform duration-500 ease-in-out flex flex-col ${isOpen ? "translate-x-0 shadow-2xl" : "translate-x-full"}`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-8 pb-6">

@@ -58,22 +58,22 @@ export default function CartPage() {
           </div>
 
           {/* Cart Items List */}
-          <div className="space-y-8 py-8">
+          <div className="space-y-6 sm:space-y-8 py-6 sm:py-8 divide-y divide-gray-100 sm:divide-y-0 [&>*+*]:pt-6 sm:[&>*+*]:pt-0">
             {items.map((item) => (
-              <div key={item.id} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <div key={item.id} className="grid grid-cols-[auto_1fr] sm:grid-cols-12 gap-x-4 gap-y-3 items-center">
                 {/* Product Details */}
-                <div className="col-span-5 flex items-center gap-6">
-                  <div className="w-20 h-20 bg-[#F4F5F9] rounded-xl flex items-center justify-center p-2 shrink-0 border border-gray-100">
+                <div className="col-span-2 sm:col-span-5 flex items-center gap-4 sm:gap-6">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#F4F5F9] rounded-xl flex items-center justify-center p-2 shrink-0 border border-gray-100">
                     <img src={item.image} alt={item.name} className="w-full h-full object-contain mix-blend-multiply" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-[#1c2135] text-[15px] mb-1 truncate leading-tight">{item.name}</h3>
-                    <div className="text-[12px] font-semibold text-[#FE6A6B]">{item.unit || 'Piece'}</div>
+                    <div className="text-[13px] font-semibold text-gray-500">৳{parseFloat(item.price || 0).toFixed(2)}{item.unit ? ` · ${item.unit}` : ''}</div>
                   </div>
                 </div>
 
                 {/* Quantity */}
-                <div className="col-span-3 flex items-center sm:justify-center mt-4 sm:mt-0">
+                <div className="col-span-1 sm:col-span-3 flex items-center sm:justify-center">
                   <div className="flex items-center bg-[#F4F5F9] rounded-lg overflow-hidden border border-gray-100 shadow-sm">
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -94,15 +94,13 @@ export default function CartPage() {
                 </div>
 
                 {/* Single Price */}
-                <div className="col-span-2 text-left sm:text-center mt-2 sm:mt-0">
-                  <span className="sm:hidden text-xs text-gray-400 uppercase tracking-wider font-bold mr-2">Price:</span>
+                <div className="hidden sm:block col-span-2 text-center">
                   <span className="font-bold text-[#1c2135] text-[15px]">৳{parseFloat(item.price || 0).toFixed(2)}</span>
                 </div>
 
                 {/* Total Price & Delete */}
-                <div className="col-span-2 flex items-center justify-between sm:justify-center gap-4 mt-2 sm:mt-0">
+                <div className="col-span-1 sm:col-span-2 flex items-center justify-end sm:justify-center gap-4">
                   <div>
-                    <span className="sm:hidden text-xs text-gray-400 uppercase tracking-wider font-bold mr-2">Total:</span>
                     <span className="font-bold text-[#1c2135] text-[15px]">
                       ৳{parseFloat(item.price * item.quantity).toFixed(2)}
                     </span>

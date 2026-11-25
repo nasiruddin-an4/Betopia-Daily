@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
       <body className={`${outfit.variable} antialiased min-h-screen flex flex-col bg-white font-sans overflow-x-hidden`}>
         <MsalProviderWrapper>
           <Navbar />
-          <main className="flex-1 w-full container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <main className="flex-1 w-full container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-10">
             <AuthGuard>
               {children}
             </AuthGuard>

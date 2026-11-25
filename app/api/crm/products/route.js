@@ -19,7 +19,7 @@ export async function GET(request) {
     const search = (sp.get('search') || '').trim();
     const category = (sp.get('category') || '').trim();
     const sort = SORTS[sp.get('sort')];
-    if (search) qs.set('search', search);
+    if (search) qs.set('q', search); // the CRM's search parameter is `q`
     if (category) qs.set('category', category);
     if (sort) qs.set('sort', sort);
 

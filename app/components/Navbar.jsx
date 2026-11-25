@@ -74,29 +74,28 @@ export default function Navbar() {
       <nav className="bg-white sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Tier */}
-          <div className="flex items-center justify-between py-4 gap-4">
+          <div className="flex items-center justify-between py-3 lg:py-4 gap-3 lg:gap-4">
             {/* Logo & Main Nav */}
-            <div className="flex items-center shrink-0 gap-8">
+            <div className="flex items-center shrink-0 gap-6 xl:gap-8">
               <Link href="/" className="flex items-center h-10 w-auto">
-                <img src="/mainLogo.svg" alt="Betopia Daily" className="h-7 w-auto" />
+                <img src="/mainLogo.svg" alt="Betopia Daily" className="h-6 sm:h-7 w-auto" />
               </Link>
-              <Link href="/shop" className="hidden md:flex items-center gap-2 text-gray-800 font-bold hover:text-brand-bright-orange transition-colors">
+              <Link href="/shop" className="hidden lg:flex items-center gap-2 text-gray-800 font-bold hover:text-brand-bright-orange transition-colors">
                 <LayoutGrid size={16} />
                 Shop
               </Link>
             </div>
 
             {/* Search - Central */}
-            <div className="hidden md:flex flex-1 max-w-3xl mx-8">
+            <div className="hidden lg:flex flex-1 max-w-3xl mx-4 xl:mx-8">
               <SearchBox variant="desktop" />
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-4 shrink-0">
-              {/* Mobile Search Toggle (Moved to Sidebar) */}
+            <div className="flex items-center gap-1 sm:gap-3 shrink-0">
 
               {isAuthenticated && user ? (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1 sm:gap-3">
                   {/* Cart Toggle Button */}
                   <button
                     onClick={openCart}
@@ -201,7 +200,7 @@ export default function Navbar() {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1 sm:gap-3">
                   {/* Cart Toggle Button for Unauthenticated */}
                   <button
                     onClick={openCart}
@@ -216,8 +215,8 @@ export default function Navbar() {
                     )}
                   </button>
 
-                  <div className="hidden sm:flex items-center">
-                    <button onClick={openLoginModal} className="bg-brand-bright-orange hover:bg-brand-coral text-white font-medium py-2 px-6 rounded-lg text-sm transition-colors">
+                  <div className="flex items-center">
+                    <button onClick={openLoginModal} className="bg-brand-bright-orange hover:bg-brand-coral text-white font-medium py-2 px-4 sm:px-6 rounded-lg text-sm transition-colors">
                       Login
                     </button>
                   </div>
@@ -233,9 +232,12 @@ export default function Navbar() {
               </button>
             </div>
           </div>
+
+          {/* Search row on phones and tablets */}
+          <div className="lg:hidden pb-3">
+            <SearchBox variant="desktop" />
+          </div>
         </div>
-
-
 
         {/* Mobile Menu Sidebar */}
         <div className={`md:hidden fixed inset-0 z-[100] transition-opacity duration-300 ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
@@ -243,7 +245,7 @@ export default function Navbar() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
 
           {/* Sidebar */}
-          <div className={`absolute top-0 right-0 h-full w-4/5 max-w-[320px] bg-white shadow-2xl flex flex-col transform transition-transform duration-500 ease-in-out ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
+          <div className={`absolute top-0 right-0 h-full w-4/5 max-w-[320px] bg-white flex flex-col transform transition-transform duration-500 ease-in-out ${isMenuOpen ? "translate-x-0 shadow-2xl" : "translate-x-full"}`}>
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <span className="text-xl font-bold text-gray-900">Menu</span>
@@ -284,11 +286,8 @@ export default function Navbar() {
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
-              {/* Mobile Search */}
-              <div className="w-full mb-2">
-                <SearchBox variant="mobile" onNavigate={() => setIsMenuOpen(false)} />
-              </div>
               <Link href="/" className="font-medium text-gray-700 hover:text-[#0D9488] transition-colors" onClick={() => setIsMenuOpen(false)}>Home</Link>
+              <Link href="/shop" className="font-medium text-gray-700 hover:text-[#0D9488] transition-colors" onClick={() => setIsMenuOpen(false)}>Shop</Link>
               <button onClick={() => { setIsMenuOpen(false); openCart(); }} className="font-medium text-gray-700 hover:text-[#0D9488] text-left transition-colors">View Cart</button>
 
               {user && (
