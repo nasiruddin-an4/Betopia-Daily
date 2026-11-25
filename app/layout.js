@@ -14,7 +14,7 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: "Betopia Daily | Premium Internal E-Commerce",
+  title: "Betopia Daily",
   description: "Exclusive grocery & fresh food delivery for Betopia Group employees.",
 };
 
